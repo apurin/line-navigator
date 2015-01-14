@@ -1,8 +1,7 @@
 // Allows to navigate given sources lines, saving milestones to optimize random reading
 // options = {
-//		milestones: [], 		// optional 
-//
-//
+//        milestones: [],         // optional: array of milestones, which can be obtained by getMilestones() method and stored to speed up random reading in future
+//        chunkSize: 1024 * 4,    // optional: size of chunk to read at once
 // }
 function LineNavigator(readChunk, decode, options) {
     var self = this;
@@ -80,13 +79,13 @@ function LineNavigator(readChunk, decode, options) {
                         line: line
                   };
     }
-	
-	// Returns current milestones, to speed up file random reading in future
-	self.getMilestones = function() {
-		return milestones;
-	}
     
-	// Reads optimal number of lines
+    // Returns current milestones, to speed up file random reading in future
+    self.getMilestones = function() {
+        return milestones;
+    }
+    
+    // Reads optimal number of lines
     // callback: function(err, index, lines, eof)
     self.readSomeLines = function(index, callback) {
         var place = getPlaceToStart(index);
@@ -132,7 +131,7 @@ function LineNavigator(readChunk, decode, options) {
 
     // Finds next occurrence of regular expression starting from given index
     // callback: function(err, index, match{offset, length, line})
-	// offset and length are belong to match inside line
+    // offset and length are belong to match inside line
     self.find = function(regex, index, callback) {
         self.readSomeLines(index, function readSomeLinesHandler(err, firstLine, lines, eof) {
             if (err) return callback(err);
@@ -150,8 +149,8 @@ function LineNavigator(readChunk, decode, options) {
     
     // Finds all occurrences of regular expression starting from given index
     // callback: function(err, index, limitHit, results)
-	// result is an array of objects with following structure {index, offset, length, line}
-	// offset and length are belong to match inside line
+    // result is an array of objects with following structure {index, offset, length, line}
+    // offset and length are belong to match inside line
     self.findAll = function(regex, index, limit, callback) {
         var results = [];
 

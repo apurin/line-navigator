@@ -41,22 +41,22 @@ function FileNavigator (file) {
     };
 
     var navigator = new LineNavigator(readChunk, decode, { chunkSize: 1024 * 1024 * 4 });
-	
-	// Returns current milestones, to speed up file random reading in future
-	self.getMilestones = navigator.getMilestones;
+    
+    // Returns current milestones, to speed up file random reading in future
+    self.getMilestones = navigator.getMilestones;
 
-	// Reads optimal number of lines
+    // Reads optimal number of lines
     // callback: function(err, index, lines, eof, progress)
-	// where progress is 0-100 % of file 
+    // where progress is 0-100 % of file 
     self.readSomeLines = function (index, callback) {
         navigator.readSomeLines(index, function (err, index, lines, eof) {
             callback(err, index, lines, eof, getProgress());
         });
     };
-    
+
     // Reads exact amount of lines
     // callback: function(err, index, lines, eof, progress)
-	// where progress is 0-100 % of file 
+    // where progress is 0-100 % of file 
     self.readLines = function (index, count, callback) {
         navigator.readLines(index, count, function (err, index, lines, eof) {
             callback(err, index, lines, eof, getProgress());
@@ -65,17 +65,17 @@ function FileNavigator (file) {
     
     // Finds next occurrence of regular expression starting from given index
     // callback: function(err, index, match{offset, length, line})
-	// offset and length are belong to match inside line
+    // offset and length are belong to match inside line
     self.find = navigator.find;
     
     // Finds all occurrences of regular expression starting from given index
     // callback: function(err, index, limitHit, results)
-	// result is an array of objects with following structure {index, offset, length, line}
-	// offset and length are belong to match inside line
+    // result is an array of objects with following structure {index, offset, length, line}
+    // offset and length are belong to match inside line
     self.findAll = navigator.findAll;
 
-	// Returns size of file in bytes
-	// callback: function(size)
+    // Returns size of file in bytes
+    // callback: function(size)
     self.getSize = function(callback) {
         return callback(file ? file.size : 0);
     };
