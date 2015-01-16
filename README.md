@@ -7,4 +7,4 @@ https://github.com/anpur/client-line-navigator/wiki
 Current project state:
 - **Code**: READY
 - **Reference**: Full methods coverage in Wiki
-- **Demo**: example page using all methods (available as source and in jsFiddle)
+- **Demo**: available as source and in jsFiddle
