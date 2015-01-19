@@ -1,24 +1,24 @@
 # LineNavigator (client)
 Read line-by-line, navigate by index and search inside local files right in browser via HTML5.
-- **No file size limit**: simple [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) lags for big files and crashes browser for files larger than ~400 MB.
-- **Random access to lines**: lines byte offsets are mapped, so repetitive access will be super quick, either you accessing line 12 or 5424675.
-- **Embedded search tools**: allowing you to search anything, highlight matches, etc.
-- **Position as percentages**: you can easily build UI on top of it.
-- **Tiny codebase and no dependencies**: less than 3 KB.
+- No file size limit: simple [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) lags for big files and crashes browser for files larger than ~400 MB.
+- Random access to lines: lines byte offsets are mapped, so repetitive access will be super quick, either you accessing line 12 or 5424675.
+- Embedded search tools: allowing you to search anything, highlight matches, etc.
+- Position as percentages: you can easily build UI on top of it.
+- Tiny codebase and no dependencies: less than 3 KB.
 
 Current project state:
 - **Code**: READY
 - **Reference**: Full methods coverage here
 - **Demo**: available as source and in jsFiddle
 
-### Check it out
+#### Check it out
 Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/1/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
 
-### Structure
+#### Structure
 Solution consists of two classes: `LineNavigator` which holds the general logic and its wrapper `FileNavigator` which injects functions specific for HTML5 File API. To use them - add both of them in described order and instantiate FileNavigator with File instance.
 
 #### LineNavigator
-**LineNavigator** is a simple class, which allows you to work with any text files without reading it whole to memory.
+LineNavigator is a simple class, which allows you to work with any text files without reading it whole to memory.
 Features are:
 - Read whole file line by line
 - Read random line by index (each access saves milestone info to optimize future ones)
@@ -26,7 +26,7 @@ Features are:
 - Finding all lines, matching regular pattern
 
 #### FileNavigator
-**FileNavigator** is a wrapper for LineNavigator to work with HTML5 files locally, right in clients browser.
+FileNavigator is a wrapper for LineNavigator to work with HTML5 files locally, right in clients browser.
 Features are:
 - All features of LineNavigator
 - Get % of file processed for read operations
