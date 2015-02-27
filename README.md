@@ -14,6 +14,46 @@ Current project state:
 #### Check it out
 Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/1/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
 
+#### Quick start
+Add following to the end of `<body>` tag:
+```
+<body>
+	...
+	<input type="file" id="input">
+	...
+	<script src="line-navigator.js"></script>
+	<script src="file-navigator.js"></script>
+</body>
+```
+Get [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) instance and pass it to FileNavigator:
+```
+<script>
+	var file = document.getElementById('input').files[0];
+	
+	var navigator = new FileNavigator(file);
+    
+    var indexToStartWith = 0;  // starting from beginning
+        
+    navigator.readSomeLines(indexToStartWith, function linesReadHandler(err, index, lines, eof, progress) {
+        // Error happened
+		if (err) return; 
+        
+		// End of file
+        if (eof) return;
+		
+		// Reading lines
+		for (var i = 0; i < lines.length; i++) {
+			var lineIndex = index + i;
+			var line = lines[i];
+			// Do something with line
+		}		
+        
+		// Reading next chunk, adding number of lines read to first line in current chunk
+        navigator.readSomeLines(index + lines.length, linesReadHandler);
+    });
+</script>
+```
+
 #### Structure
 Solution consists of two classes: `LineNavigator` which holds the general logic and its wrapper `FileNavigator` which injects functions specific for HTML5 File API. To use them - add both of them in described order and instantiate FileNavigator with File instance.
 
