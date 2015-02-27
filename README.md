@@ -15,31 +15,31 @@ Current project state:
 Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/1/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
 
 #### Quick start
-Add following to the end of `<body>` tag:
+Add file input, if you don't have one yet, and include scripts to HTML:
 ```
 <body>
 	...
-	<input type="file" id="input">
+	<input type="file" id="input" onchange="readFile()">	
 	...
 	<script src="line-navigator.js"></script>
 	<script src="file-navigator.js"></script>
 </body>
 ```
-Get [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) instance and pass it to FileNavigator:
+Get [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) instance and pass it to FileNavigator.
 ```
-<script>
+var readFile = function() {
 	var file = document.getElementById('input').files[0];
-	
+
 	var navigator = new FileNavigator(file);
-    
-    var indexToStartWith = 0;  // starting from beginning
-        
-    navigator.readSomeLines(indexToStartWith, function linesReadHandler(err, index, lines, eof, progress) {
-        // Error happened
+
+	var indexToStartWith = 0;  // starting from beginning
+		
+	navigator.readSomeLines(indexToStartWith, function linesReadHandler(err, index, lines, eof, progress) {
+		// Error happened
 		if (err) return; 
-        
+		
 		// End of file
-        if (eof) return;
+		if (eof) return;
 		
 		// Reading lines
 		for (var i = 0; i < lines.length; i++) {
@@ -47,11 +47,11 @@ Get [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_a
 			var line = lines[i];
 			// Do something with line
 		}		
-        
+		
 		// Reading next chunk, adding number of lines read to first line in current chunk
-        navigator.readSomeLines(index + lines.length, linesReadHandler);
-    });
-</script>
+		navigator.readSomeLines(index + lines.length, linesReadHandler);
+	});
+}
 ```
 
 #### Structure
