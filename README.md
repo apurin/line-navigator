@@ -114,7 +114,9 @@ options = {
 FileNavigator is specially created wrapper of LineNavigator to work with [HTML5 File](http://dev.w3.org/2006/webapi/FileAPI/#file) objects.
 
 #### **constructor**
-`function FileNavigator (file) { ... }` Just provide file
+`function FileNavigator (file[, encoding]) { ... }` Just provide file
+
+Optionally you can provide a string specifying the encoding of the file. If present, this will be passed as the optional encoding parameter to the [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) method.
 
 #### readSomeLines()
 `function( index, callback(err, index, lines, eof, progress) ) { ... }` Reads optimal number of lines.

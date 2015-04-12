@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 // LineNavigator wrapper to work specifically with HTML5 File object
-function FileNavigator (file) {
+function FileNavigator (file, encoding) {
     var self = this;
     var size = file.size;
     
@@ -58,8 +58,11 @@ function FileNavigator (file) {
         reader.onloadend = function(progress) {
             callback(progress.currentTarget.result);
         };
-
-        reader.readAsText(new Blob([buffer]));       
+	if (typeof encoding !== 'undefined') {
+	        reader.readAsText(new Blob([buffer]), encoding);
+	} else {
+	        reader.readAsText(new Blob([buffer]));
+	}
     };
 
     var navigator = new LineNavigator(readChunk, decode, { chunkSize: 1024 * 1024 * 4 });
