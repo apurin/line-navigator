@@ -12,7 +12,7 @@ Current project state:
 - **Demo**: available as source and in jsFiddle
 
 #### Check it out
-Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/1/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
+Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/3/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
 
 #### Quick start
 Add file input, if you don't have one yet, and include scripts to HTML:
