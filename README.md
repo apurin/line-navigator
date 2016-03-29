@@ -12,7 +12,7 @@ Current project state:
 - **Demo**: available as source and in jsFiddle
 
 #### Check it out
-Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/3/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
+Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/3/). Git clone and open [demo.html](https://github.com/anpur/client-line-navigator/blob/master/demo.html) to see main scenarios.
 
 #### Quick start
 Install [line-navigator](https://www.npmjs.com/package/line-navigator) NPM module to the root of your project:
