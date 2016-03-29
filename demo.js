@@ -46,7 +46,7 @@ function Read() {
         
         if (eof)  {
             finished = new Date();
-            DemoFinished('Total ' + countLines + ' lines readed');
+            DemoFinished('Total ' + countLines + ' lines read');
             return;
         }
         

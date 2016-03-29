@@ -1,0 +1,22 @@
+{
+  "name": "line-navigator",
+  "version": "1.0.2",
+  "description": "Reads, searches and navigates by line numbers HTML5 text files of any size in browser",
+  "main": "line-navigator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anpur/client-line-navigator.git"
+  },
+  "keywords": [
+    "frontend", "file", "search", "browser", "html5", "line-by-line", "random access"
+  ],
+  "author": "Anton Purin <purin.anton@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anpur/client-line-navigator/issues"
+  },
+  "homepage": "https://github.com/anpur/client-line-navigator"
+}

@@ -1,29 +1,13 @@
-// purin.anton@gmail.com
-// 
+// https://github.com/anpur/client-line-navigator
+// The MIT License (MIT)
 // Copyright (c) 2015 Anton Purin
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
 
 // Allows to navigate given sources lines, saving milestones to optimize random reading
 // options = {
-//        milestones: [],         // optional: array of milestones, which can be obtained by getMilestones() method and stored to speed up random reading in future
-//        chunkSize: 1024 * 4,    // optional: size of chunk to read at once
+//        milestones: [],                   // optional: array of milestones, which can be obtained by getMilestones() method and stored to speed up random reading in future
+//        chunkSize: 1024 * 4,              // optional: size of chunk to read at once
+//        newLineCode: '\n'.charCodeAt(0),  // optional: byte which represents end of line
+//        splitPattern: /\r?\n/             // optional: regex pattern
 // }
 function LineNavigator(readChunk, decode, options) {
     var self = this;
@@ -34,10 +18,10 @@ function LineNavigator(readChunk, decode, options) {
 
     // private    
     options = options ? options : {};
-    var milestones =    options.milestones    ? options.milestones    : [];    // { firstLine, lastLine, offset, length }
+    var milestones =    options.milestones    ? options.milestones    : [];    // [ { firstLine, lastLine, offset, length }, ... ]
     var chunkSize =     options.chunkSize     ? options.chunkSize     : 1024 * 4;
-    var newLineCode =   '\n'.charCodeAt(0);
-    var splitPattern =  /\r?\n/;
+    var newLineCode =   options.newLineCode   ? options.newLineCode   : '\n'.charCodeAt(0);
+    var splitPattern =  options.splitPattern  ? options.splitPattern  : /\r?\n/;
     
     // Searches for milestone
     var getPlaceToStart = function (index) {
@@ -206,4 +190,9 @@ function LineNavigator(readChunk, decode, options) {
             self.readSomeLines(firstLine + lines.length + 1, readSomeLinesHandler);
         });
     };
+}
+
+
+if (typeof module !== "undefined") {
+    module.exports = FileNavigator;
 }

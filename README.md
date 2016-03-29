@@ -15,14 +15,18 @@ Current project state:
 Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/3/). Git clone [demo page folder](https://github.com/anpur/client-line-navigator/tree/master/demo), to see, how it works.
 
 #### Quick start
+Install [line-navigator](https://www.npmjs.com/package/line-navigator) NPM module to the root of your project:
+
+    npm install line-navigator
+
 Add file input, if you don't have one yet, and include scripts to HTML:
 ```
 <body>
 	...
 	<input type="file" id="input" onchange="readFile()">	
 	...
-	<script src="line-navigator.js"></script>
-	<script src="file-navigator.js"></script>
+	<script src="node_modules/line-navigator/nodeline-navigator.js"></script>
+	<script src="node_modules/line-navigator/file-navigator.js"></script>
 </body>
 ```
 Get [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) instance and pass it to FileNavigator.
@@ -86,8 +90,10 @@ You need to inject two simple functions into constructor:
 - Other settings:
 ```
 options = {
-	milestones: [],         // optional: array of milestones, which can be obtained by getMilestones() method and stored to speed up random reading in future
-	chunkSize: 1024 * 4,    // optional: size of chunk to read at once
+	milestones: [],                   // optional: array of milestones, which can be obtained by getMilestones() method and stored to speed up random reading in future
+	chunkSize: 1024 * 4,              // optional: size of chunk to read at once
+    newLineCode: '\n'.charCodeAt(0),  // optional: byte which represents end of line
+    splitPattern: /\r?\n/             // optional: regex pattern
 }
 ```
 
@@ -114,7 +120,8 @@ options = {
 FileNavigator is specially created wrapper of LineNavigator to work with [HTML5 File](http://dev.w3.org/2006/webapi/FileAPI/#file) objects.
 
 #### **constructor**
-`function FileNavigator (file[, encoding]) { ... }` Just provide file
+`function FileNavigator (file[, encoding][, options]) { ... }` Just provide file
+`options` will be passed further to `LineNavigator` constructor.
 
 Optionally you can provide a string specifying the encoding of the file. If present, this will be passed as the optional encoding parameter to the [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) method.
 
