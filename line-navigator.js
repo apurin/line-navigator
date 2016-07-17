@@ -1,7 +1,6 @@
 ;(function(){
 
-    function LineNavigator (file, options) {
-        
+    function LineNavigator (file, options) {        
     }
 
     // Searches for first occurance of pattern in given line returning it's position
@@ -51,12 +50,25 @@
     }
 
     LineNavigator.prototype.examineChunk = function(buffer, length, isEof) {
+        var lines = 0;
+        var offset = 0;
         
+        do {
+            var position = LineNavigator.prototype.getLineEnd(buffer, offset, length, isEof);
+            if (position !== undefined) {
+                lines++;
+                offset = position += 1;
+            }
+        } while (position !== undefined);
 
-        return {
-            lines: 0,
-            offset: 0
-        };
+        if (offset !== length && isEof) {
+            lines++;
+            offset = length;
+        }
+
+        return lines !== 0 
+            ? { lines: lines, offset: offset - 1 } 
+            : undefined;
     };
 
     // For node.js

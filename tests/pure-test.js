@@ -96,8 +96,30 @@ describe("LineNavigator.prototype.examineChunk", function(){
     var r = '\r'.charCodeAt(0);
     var n = '\n'.charCodeAt(0);   
   
-    it("no delimeter", function() {        
-        var buffer = [a, r, a, a];
-        //assert.deepEqual(examineChunk())
+    it("simple", function() {        
+        var buffer = [a, r, a, r, a];
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, offset: 3 });
+        buffer = [a, n, a, n, a];
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, offset: 3 });
+    });
+    it("no separators", function() {        
+        var buffer = [a, a, a, a, a];
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), undefined);
+    });    
+    it("eof without line break", function() {        
+        var buffer = [a, a, a, a, a];
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, offset: 4 });
+        buffer = [a, a, n, a, a];
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 2, offset: 4 });
+    });
+    it("empty lines", function() {        
+        var buffer = [a, n, r, n, a];
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, offset: 3 });
+    });
+    it("eof", function() {        
+        var buffer = [a, a, a, a, n];
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, offset: 4 });
+        buffer = [a, a, a, r, n];
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, offset: 4 });
     });
 });
