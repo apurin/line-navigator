@@ -12,13 +12,16 @@ describe("Functional tests", function(){
     }
 
     it("no matches", function(){
-        var navigator = new lineNavigator(fs.createReadStream(tmpobj.name));
-        var stream = fs.createReadStream(tmpobj.name);
-        var result = navigator.readSomeLines(stream, 0);
+        var navigator = new lineNavigator(tmpobj.fd);
 
-        // console.log("Filedescriptor: ", tmpobj.fd);
-
+        var result = navigator.readSomeLines(0, function (err, index, lines, eof) {
+            console.log('readSomeLines callback called');
+            console.log(arguments);          
+        });
     });
 
-    tmpobj.removeCallback();
+    after( function(){ 
+        console.log('cleanup');
+        tmpobj.removeCallback();
+    });
 });

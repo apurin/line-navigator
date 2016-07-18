@@ -10,66 +10,30 @@ var getLineNavigatorClass = function() {
         var readChunk =     options.readChunk     ? options.readChunk     : undefined;
         var decode =        options.decode        ? options.decode        : undefined;
 
-        // Choosing proper readChunk and decode handlers HTML5 File API vs Node.js ReadStream
-        // File is instance of ReadStream from Node.js
-        if (file._readableState !== undefined) {
-            readChunk = readChunk !== undefined 
-                ? readchunk 
-                : function (file, offset, callback) {
-                    // TODO: node.js version here
-                };
-
-            decode = decode !== undefined 
-                ? decode 
-                : function(buffer, callback) {
-                    // TODO: node.js version here
-                }
-        } 
-        // File is instance of File from HTML5 File API 
-        else if (typeof File === 'function' && file instanceof File) {
-            readChunk = readChunk !== undefined 
-                ? readchunk 
-                : function (offset, length, callback) {
-                    lastPosition = offset + length;
-                    var reader = new FileReader();
-
-                    reader.onloadend = function(progress) {
-                        var buffer;
-                        if (reader.result) {
-                            buffer = new Int8Array(reader.result, 0);
-                            buffer.slice = buffer.subarray;
-                        }
-                        callback(progress.err, buffer, progress.loaded);
-                    };
-
-                    reader.readAsArrayBuffer(file.slice(offset, offset + length));
-                };
-            decode = decode !== undefined 
-                ? decode 
-                : function(buffer, callback) {
-                    var reader = new FileReader();
-                    reader.onloadend = function(progress) {
-                        callback(progress.currentTarget.result);
-                    };
-                    if (typeof encoding !== 'undefined') {
-                        reader.readAsText(new Blob([buffer]), encoding);
-                    } else {
-                        reader.readAsText(new Blob([buffer]));
-                    }
-                };
+        var provider = new FileHandlersProvider();
+        var handlers = undefined;
+        if (provider.isNode()) {
+            console.log('this is Node.js');
+            handlers = provider.nodeFileHandlers;            
+        } else {
+            console.log('this is browser');
+            handlers = provider.html5FileHandlers;
         }
-        else {
-            throw "Given file should be either instance of File from HTML5 File API or ReadStream from Node.js. But it is not:\r\n" + file;
-        }
+        readChunk = readChunk ? readChunk : handlers.readChunk;
+        decode = decode ? decode : handlers.decode;
+
+        
 
         // Reads optimal number of lines
         // callback: function(err, index, lines, eof)
         self.readSomeLines = function(index, callback) {
             var place = LineNavigator.prototype.getPlaceToStart(index, milestones);
-            console.log(place);
+            
 
             //offset, length, buffer, callback
             readChunk(file, place.offset, chunkSize, function readChunkCallback(err, buffer, bytesRead) {
+                console.log(arguments);
+
                 if (err) return callback(err, index);
 
                 var eof = bytesRead < chunkSize;
@@ -169,12 +133,14 @@ var getLineNavigatorClass = function() {
 };
 
 // For Node.js
-if (typeof module !== "undefined") {
+if (typeof module !== 'undefined' && module.exports) {
+    FileHandlersProvider = require('./file-handlers-provider.js');
     module.exports = getLineNavigatorClass();
 }
 // TODO: check that AMD version works
 else if (typeof define === 'function') {
-    define('line-navigator', [], function(){
+    define('line-navigator', ['./file-handlers-provider.js'], function(fileHandlersProvider){
+        FileHandlersProvider = fileHandlersProvider;
         return { LineNavigator : getLineNavigatorClass() };    
     });
 }
