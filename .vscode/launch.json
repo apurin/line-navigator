@@ -1,0 +1,27 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Run Mocha functional tests",
+			"type": "node",
+            "request": "launch",
+			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+			"stopOnEntry": false,
+			"args": ["tests/functional-tests.js"],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"env": { "NODE_ENV": "development"}
+		},
+        {
+			"name": "Run Mocha unit tests",
+			"type": "node",
+            "request": "launch",
+			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+			"stopOnEntry": false,
+			"args": ["tests/pure-tests.js"],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"env": { "NODE_ENV": "development"}
+		}
+	]
+}
