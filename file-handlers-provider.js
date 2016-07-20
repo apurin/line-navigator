@@ -1,9 +1,11 @@
 ; var createFileHandlersProvider = function() {
 
-    function FileHandlersProvider () {
+    function FileHandlersProvider (encoding) {
+        var self = this;
         if (FileHandlersProvider.prototype.isNode()) {
             FileHandlersProvider.prototype.fs = require('fs');
-            FileHandlersProvider.prototype.string_decoder = require('string_decoder');
+            var StringDecoder = require('string_decoder').StringDecoder;
+            FileHandlersProvider.prototype.string_decoder = new StringDecoder(encoding);
         }
     }
 

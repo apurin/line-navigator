@@ -29,22 +29,23 @@ describe("LineNavigator.prototype.getPlaceToStart", function(){
     var milestones = [
         { firstLine: 0, lastLine: 3, offset: 0, length: 10 },
         { firstLine: 4, lastLine: 5, offset: 10, length: 4 },
-        { firstLine: 6, lastLine: 9, offset: 14, length: 6 }
+        { firstLine: 6, lastLine: 8, offset: 14, length: 6 }
     ];
     it("begining", function(){
-        assert.deepEqual(getPlaceToStart(0, milestones), { firstLine: 0, offset: 0 });
+        assert.deepEqual(getPlaceToStart(0, milestones), { firstLine: 0, offset: 0, isNew: false });
+        assert.deepEqual(getPlaceToStart(0, []), { firstLine: 0, offset: 0, isNew: true });
     });
     it("random", function(){
-        assert.deepEqual(getPlaceToStart(1, milestones), { firstLine: 0, offset: 0 });
-        assert.deepEqual(getPlaceToStart(4, milestones), { firstLine: 4, offset: 10 });
-        assert.deepEqual(getPlaceToStart(5, milestones), { firstLine: 4, offset: 10 });
-        assert.deepEqual(getPlaceToStart(6, milestones), { firstLine: 6, offset: 14 });
-        assert.deepEqual(getPlaceToStart(7, milestones), { firstLine: 6, offset: 14 });
-        assert.deepEqual(getPlaceToStart(9, milestones), { firstLine: 6, offset: 14 });
+        assert.deepEqual(getPlaceToStart(1, milestones), { firstLine: 0, offset: 0, isNew: false });
+        assert.deepEqual(getPlaceToStart(4, milestones), { firstLine: 4, offset: 10, isNew: false });
+        assert.deepEqual(getPlaceToStart(5, milestones), { firstLine: 4, offset: 10, isNew: false });
+        assert.deepEqual(getPlaceToStart(6, milestones), { firstLine: 6, offset: 14, isNew: false });
+        assert.deepEqual(getPlaceToStart(7, milestones), { firstLine: 6, offset: 14, isNew: false });
+        assert.deepEqual(getPlaceToStart(8, milestones), { firstLine: 6, offset: 14, isNew: false });
     });
     it("end", function(){
-        assert.deepEqual(getPlaceToStart(10, milestones), { firstLine: 10, offset: 20 });
-        assert.deepEqual(getPlaceToStart(100, milestones), { firstLine: 10, offset: 20 });
+        assert.deepEqual(getPlaceToStart(9, milestones), { firstLine: 9, offset: 20, isNew: true });
+        assert.deepEqual(getPlaceToStart(100, milestones), { firstLine: 9, offset: 20, isNew: true });
     });
 });
 
@@ -90,7 +91,7 @@ describe("LineNavigator.prototype.getLineEnd", function(){
 });
 
 describe("LineNavigator.prototype.examineChunk", function(){
-    var examineChunk = LineNavigator.prototype.examineChunk; // (buffer, length, isEof) : { lines, offset }
+    var examineChunk = LineNavigator.prototype.examineChunk; // (buffer, length, isEof) : { lines, length }
 
     var a = 'a'.charCodeAt(0);
     var r = '\r'.charCodeAt(0);
@@ -98,9 +99,9 @@ describe("LineNavigator.prototype.examineChunk", function(){
   
     it("simple", function() {        
         var buffer = [a, r, a, r, a];
-        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, offset: 3 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, length: 3 });
         buffer = [a, n, a, n, a];
-        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, offset: 3 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, length: 3 });
     });
     it("no separators", function() {        
         var buffer = [a, a, a, a, a];
@@ -108,18 +109,18 @@ describe("LineNavigator.prototype.examineChunk", function(){
     });    
     it("eof without line break", function() {        
         var buffer = [a, a, a, a, a];
-        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, offset: 4 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, length: 4 });
         buffer = [a, a, n, a, a];
-        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 2, offset: 4 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 2, length: 4 });
     });
     it("empty lines", function() {        
         var buffer = [a, n, r, n, a];
-        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, offset: 3 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, length: 3 });
     });
     it("eof", function() {        
         var buffer = [a, a, a, a, n];
-        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, offset: 4 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, length: 4 });
         buffer = [a, a, a, r, n];
-        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, offset: 4 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, length: 4 });
     });
 });
