@@ -7,7 +7,7 @@ var getLineNavigatorClass = function() {
         options = options ? options : {};
         var milestones =    options.milestones    ? options.milestones    : [];    // [ { firstLine, lastLine, offset, length }, ... ]
         var encoding =      options.encoding      ? options.encoding      : 'utf8';
-        var chunkSize =     options.chunkSize     ? options.chunkSize     : 10;
+        var chunkSize =     options.chunkSize     ? options.chunkSize     : 1024 * 4;
         var readChunk =     options.readChunk     ? options.readChunk     : undefined;
         var decode =        options.decode        ? options.decode        : undefined;
 
@@ -33,57 +33,41 @@ var getLineNavigatorClass = function() {
                 var isEof = bytesRead < chunkSize;
   
                 var chunkContent = self.examineChunk(buffer, bytesRead, isEof); 
+                if (chunkContent === undefined)
+                    return callback('Line ' + index + ' is out of index, last available: ' + (milestones.length > 0 ? milestones[milestones.length - 1].lastLine : "none"), index);
                 var inChunk = { 
                     firstLine: place.firstLine, 
-                    lastLine: place.firstLine + chunkContent.lines, 
+                    lastLine: place.firstLine + chunkContent.lines - 1, 
                     offset: place.offset,
-                    length: chunkContent.length
+                    length: chunkContent.length + 1
                 };
 
-                if (place.isNew) {
-                    var newMilestone = inChunk;
-                    console.log('milestone: ' + JSON.stringify(newMilestone));
-                    console.log('buffer: ' + JSON.stringify(buffer.slice(0, chunkContent.length + 1)));
-                    milestones.push(newMilestone);
-                }
+                if (place.isNew) 
+                    milestones.push(inChunk);               
 
                 var targetInChunk = inChunk.firstLine <= index && index <= inChunk.lastLine;
 
                 if (targetInChunk) {
-                    //console.log('target in chunk: ' + JSON.stringify(inChunk));
                     decode(buffer.slice(0, inChunk.length), function(text) {
-                        callback(undefined, "decoded: " + text);
+                        var expectedLinesCount = inChunk.lastLine - inChunk.firstLine + (isEof ? 2 : 1);
+                        
+                        var lines = text.split(/\r\n|\n|\r/);                            
+                        if (!isEof)
+                            lines = lines.slice(0, lines.length - 1);
+                        if (expectedLinesCount !== lines.length) 
+                            throw "expected " + expectedLinesCount + ", actual " + lines.length                        
+                        if (index != inChunk.firstLine)
+                            lines = lines.splice(index - inChunk.firstLine);                        
+                        callback(undefined, index, lines, isEof); // (err, index, lines, eof)
                     });
                 } else {
                     if (!isEof) {                        
-                        //console.log('current offset: ' + place.offset + ' current length: ' + chunkContent.length + ' current end: ' + (place.offset + chunkContent.length));
                         place = self.getPlaceToStart(index, milestones);
-                        console.log('going to read from: ' + place.offset );
-                        //console.log('place to start: ' + JSON.stringify(place));
                         readChunk(file, place.offset, chunkSize, readChunkCallback);
                     } else {
-                         return callback('Line ' + index + ' is out of index, last available: ' + inChunk.lastLine, index);
+                        return callback('Line ' + index + ' is out of index, last available: ' + inChunk.lastLine, index);
                     }
-                }
-
-                
-
-                
-
-                // Wanted line in chunk
-                // if (inChunk.firstLine <= index && index <= inChunk.lastLine) {
-                //     getLines(buffer, inChunk.length, function(lines) {
-                //         if (index != inChunk.firstLine)
-                //             lines = lines.splice(index - inChunk.firstLine);
-                //         callback(undefined, index, lines, eof);
-                //     })
-                //     // Wanted line not in this chunk             
-                // } else {
-                //     if (eof) return callback('Line ' + index + ' is out of index, last available: ' + inChunk.lastLine, index);
-                //     
-                //     place = inChunk.place;
-                //     readChunk(file, place.offset, chunkSize, readChunkCallback);
-                // }
+                }                
             });
         };
     }
