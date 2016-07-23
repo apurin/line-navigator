@@ -119,8 +119,12 @@ describe("LineNavigator.prototype.examineChunk", function(){
     });
     it("eof", function() {        
         var buffer = [a, a, a, a, n];
-        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, length: 4 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 2, length: 4 });
         buffer = [a, a, a, r, n];
-        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 1, length: 4 });
+        assert.deepEqual(examineChunk(buffer, buffer.length, true), { lines: 2, length: 4 });
+    });
+    it("empty buffer", function() {        
+        var buffer = [a, a, a, a, n];
+        assert.equal(examineChunk(buffer, 0, true), undefined);
     });
 });

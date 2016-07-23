@@ -3,17 +3,31 @@ var tmp = require('tmp');
 var assert = require("chai").assert;
 var lineNavigator = require('../line-navigator.js');
 
-describe("Functional tests", function(){  
-    var tmpobj = tmp.fileSync();
+var tmpobj;
+
+var createLines = function (linesCount, lastLine, lineEndings) {
+    lineEndings = lineEndings != undefined ? lineEndings : ["\r\n", "\n", "\r"];
+    tmpobj = tmp.fileSync();
 
     // Fill temporary file with lines
-    var endings = ["\r\n", "\n", "\r"];
-    for (var i = 0; i < 100; i++) {
-        var line = "Line :" + i + endings[i % 3];
+    for (var i = 0; i < linesCount; i++) {
+        var line = "Line :" + i + lineEndings[i % lineEndings.length];
         fs.appendFileSync(tmpobj.name, line);
     }
+    if (lastLine != undefined) {
+        fs.appendFileSync(tmpobj.name, lastLine);
+    }      
+}
 
-    it("no matches", function(done){
+describe("readSomeLines", function() {
+    after( function(){ 
+        tmpobj.removeCallback();
+    });
+
+    it("50 lines ends with caret return", function(done) {
+        var linesCount = 50;
+        createLines(linesCount);
+        
         var navigator = new lineNavigator(tmpobj.fd, { chunkSize: 100 });
 
         var expected = 'Line :0';
@@ -23,12 +37,12 @@ describe("Functional tests", function(){
             assert.equal(err, undefined);
             assert.equal(wantedIndex, index);
 
-            var shouldBeEof = index + lines.length >= 99;
+            var shouldBeEof = index + lines.length >= linesCount;
 
-            if (wantedIndex < 99) {
+            if (wantedIndex < linesCount) {
                 assert.equal(expected, lines[0]);
                 assert.equal(shouldBeEof, eof);
-            } else if (wantedIndex === 99) {
+            } else if (wantedIndex === linesCount) {
                 assert.equal(expected, lines[0]);
                 assert.equal(eof, true);
             } else {
@@ -38,10 +52,10 @@ describe("Functional tests", function(){
             // set new expectations
             wantedIndex++;
 
-            if (wantedIndex < 99) {
+            if (wantedIndex < linesCount) {
                 expected = 'Line :' + wantedIndex;
                 navigator.readSomeLines(wantedIndex, readSomeLinesCallback);
-            } else if (wantedIndex === 99) {
+            } else if (wantedIndex === linesCount) {
                 expected = '';
                 navigator.readSomeLines(wantedIndex, readSomeLinesCallback);
             } else {
@@ -52,7 +66,36 @@ describe("Functional tests", function(){
         navigator.readSomeLines(wantedIndex, readSomeLinesCallback);
     });
 
-    after( function(){ 
-        tmpobj.removeCallback();
+    it("last line with no caret return", function(done) {        
+        createLines(1, "last line");
+        
+        var navigator = new lineNavigator(tmpobj.fd);
+
+        navigator.readSomeLines(0, function (err, index, lines, eof) {
+            assert.equal(err, undefined);
+            assert.equal(0, index);
+            assert.deepEqual(lines, ["Line :0", "last line"]);
+            assert.equal(eof, true);
+
+            navigator.readSomeLines(1, function (err, index, lines, eof) {
+                assert.equal(err, undefined);
+                assert.equal(1, index);
+                assert.deepEqual(lines, ["last line"]);
+                assert.equal(eof, true);    
+                done();            
+            }); 
+        });        
     });
+
+    it("empty file", function(done) {        
+        createLines(0);
+        
+        var navigator = new lineNavigator(tmpobj.fd, { chunkSize: 100 });
+
+        navigator.readSomeLines(0, function (err, index, lines, eof) {
+            assert.notEqual(err, undefined);
+            done();
+        });        
+    });
+    
 });

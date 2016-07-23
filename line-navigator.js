@@ -53,9 +53,7 @@ var getLineNavigatorClass = function() {
                         
                         var lines = text.split(/\r\n|\n|\r/);                            
                         if (!isEof)
-                            lines = lines.slice(0, lines.length - 1);
-                        if (expectedLinesCount !== lines.length) 
-                            throw "expected " + expectedLinesCount + ", actual " + lines.length                        
+                            lines = lines.slice(0, lines.length - 1);                   
                         if (index != inChunk.firstLine)
                             lines = lines.splice(index - inChunk.firstLine);                        
                         callback(undefined, index, lines, isEof); // (err, index, lines, eof)
@@ -144,12 +142,12 @@ var getLineNavigatorClass = function() {
             }
         } while (position !== undefined);
 
-        if (length !== bytesRead && isEof) {
+        if (isEof) {
             lines++;
             length = bytesRead;
         }
 
-        return lines !== 0 
+        return length > 0 
             ? { lines: lines, length: length - 1 } 
             : undefined;
     };
