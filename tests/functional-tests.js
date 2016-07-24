@@ -28,14 +28,19 @@ describe("readSomeLines", function() {
         var linesCount = 50;
         createLines(linesCount);
         
-        var navigator = new lineNavigator(tmpobj.fd, { chunkSize: 100 });
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
 
         var expected = 'Line :0';
         var wantedIndex = 0;
-        function readSomeLinesCallback(err, index, lines, eof) {
+        var minProgress = -1;
+        var maxProgress = 10;
+        function readSomeLinesCallback(err, index, lines, eof, progress) {
             // checks
             assert.equal(err, undefined);
             assert.equal(wantedIndex, index);
+            assert.notEqual(progress, undefined);
+            // assert.isAboveOrEqual(progress, minProgress);
+            // assert.isBelowOrEqual(progress, maxProgress);            
 
             var shouldBeEof = index + lines.length >= linesCount;
 
@@ -45,12 +50,15 @@ describe("readSomeLines", function() {
             } else if (wantedIndex === linesCount) {
                 assert.equal(expected, lines[0]);
                 assert.equal(eof, true);
+                //assert.equal(progress, 100);
             } else {
                 assert.fail("should not reach this condition");
             }
 
             // set new expectations
             wantedIndex++;
+            minProgress = wantedIndex - 10;
+            maxProgress = wantedIndex + 10;
 
             if (wantedIndex < linesCount) {
                 expected = 'Line :' + wantedIndex;
@@ -69,7 +77,7 @@ describe("readSomeLines", function() {
     it("last line with no caret return", function(done) {        
         createLines(1, "last line");
         
-        var navigator = new lineNavigator(tmpobj.fd);
+        var navigator = new lineNavigator(tmpobj.name);
 
         navigator.readSomeLines(0, function (err, index, lines, eof) {
             assert.equal(err, undefined);
@@ -90,7 +98,7 @@ describe("readSomeLines", function() {
     it("empty file", function(done) {        
         createLines(0);
         
-        var navigator = new lineNavigator(tmpobj.fd, { chunkSize: 100 });
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
 
         navigator.readSomeLines(0, function (err, index, lines, eof) {
             assert.notEqual(err, undefined);

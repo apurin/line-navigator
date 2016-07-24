@@ -7,27 +7,26 @@ var getLineNavigatorClass = function() {
         options = options ? options : {};
         var milestones =    options.milestones    ? options.milestones    : [];    // [ { firstLine, lastLine, offset, length }, ... ]
         var encoding =      options.encoding      ? options.encoding      : 'utf8';
-        var chunkSize =     options.chunkSize     ? options.chunkSize     : 1024 * 4;
-        var readChunk =     options.readChunk     ? options.readChunk     : undefined;
-        var decode =        options.decode        ? options.decode        : undefined;
+        var chunkSize =     options.chunkSize     ? options.chunkSize     : 1024 * 4;   
 
-        var provider = new FileHandlersProvider(encoding);
-        var handlers = undefined;
-        if (provider.isNode()) {
-            handlers = provider.nodeFileHandlers;            
-        } else {
-            handlers = provider.html5FileHandlers;
+        var wrapper = new FileWrapper(file, encoding);
+        var fileSize = wrapper.getSize();
+
+        var getProgress = function(position, line) {
+            if (fileSize === 0 && (fileSize = wrapper.getSize(file)) === 0)
+                return 0;
+            
+            var result = position / fileSize * 100; 
+            return result <= 100 
+                ? result
+                : position / (fileSize = wrapper.getSize(file)) * 100;
         }
-        readChunk = readChunk ? readChunk : handlers.readChunk;
-        decode = decode ? decode : handlers.decode;
-
-        
 
         // Reads optimal number of lines
         self.readSomeLines = function(index, callback) {
             var place = self.getPlaceToStart(index, milestones);     
 
-            readChunk(file, place.offset, chunkSize, function readChunkCallback(err, buffer, bytesRead) {                
+            wrapper.readChunk(place.offset, chunkSize, function readChunkCallback(err, buffer, bytesRead) {                
                 if (err) return callback(err, index);
 
                 var isEof = bytesRead < chunkSize;
@@ -48,27 +47,29 @@ var getLineNavigatorClass = function() {
                 var targetInChunk = inChunk.firstLine <= index && index <= inChunk.lastLine;
 
                 if (targetInChunk) {
-                    decode(buffer.slice(0, inChunk.length), function(text) {
+                    wrapper.decode(buffer.slice(0, inChunk.length), function(text) {
                         var expectedLinesCount = inChunk.lastLine - inChunk.firstLine + (isEof ? 2 : 1);
                         
-                        var lines = text.split(/\r\n|\n|\r/);                            
+                        var lines = text.split(self.splitLinesPattern);                            
                         if (!isEof)
                             lines = lines.slice(0, lines.length - 1);                   
                         if (index != inChunk.firstLine)
                             lines = lines.splice(index - inChunk.firstLine);                        
-                        callback(undefined, index, lines, isEof); // (err, index, lines, eof)
+                        callback(undefined, index, lines, isEof, getProgress(inChunk.offset)); // (err, index, lines, eof)
                     });
                 } else {
                     if (!isEof) {                        
                         place = self.getPlaceToStart(index, milestones);
-                        readChunk(file, place.offset, chunkSize, readChunkCallback);
+                        wrapper.readChunk(place.offset, chunkSize, readChunkCallback);
                     } else {
                         return callback('Line ' + index + ' is out of index, last available: ' + inChunk.lastLine, index);
                     }
                 }                
             });
-        };
+        };        
     }
+
+    LineNavigator.prototype.splitLinesPattern = /\r\n|\n|\r/;
 
     // Searches for first occurance of pattern in given line returning it's position
     LineNavigator.prototype.searchInLine = function(regex, line) {
@@ -81,15 +82,6 @@ var getLineNavigatorClass = function() {
                     line: line
               };
     }
-
-    LineNavigator.prototype.splitLines = function(buffer, length, callback) {
-        decode(buffer.slice(0, length), function(text) {
-            var lines = text.split(splitPattern);
-            if (lines.length > 0 && lines[lines.length - 1] == "")
-                lines = lines.slice(0, lines.length - 1);
-            callback(lines);
-        });
-    };
 
     // searches proper offset from file begining with given milestones
     LineNavigator.prototype.getPlaceToStart = function (index, milestones) {
@@ -152,25 +144,25 @@ var getLineNavigatorClass = function() {
             : undefined;
     };
 
-    LineNavigator.prototype.decode = function (params) {
-    };
-
     return LineNavigator;    
 };
 
 // For Node.js
 if (typeof module !== 'undefined' && module.exports) {
-    FileHandlersProvider = require('./file-handlers-provider.js');
+    FileWrapper = require('./file-wrapper.js');
     module.exports = getLineNavigatorClass();
 }
 // TODO: check that AMD version works
 else if (typeof define === 'function') {
-    define('line-navigator', ['./file-handlers-provider.js'], function(fileHandlersProvider){
-        FileHandlersProvider = fileHandlersProvider;
+    define('line-navigator', ['./file-wrapper.js'], function(fileWrapper){
+        FileWrapper = fileWrapper;
         return { LineNavigator : getLineNavigatorClass() };    
     });
 }
 // TODO: check that vanilla JS works
 else {
+    if (typeof FileWrapper === undefined) {
+        throw "For vanilla JS please add 'file-wrapper.js' script tag before this one."
+    }
     LineNavigator = getLineNavigatorClass();
 }
