@@ -10,16 +10,12 @@ var getLineNavigatorClass = function() {
         var chunkSize =     options.chunkSize     ? options.chunkSize     : 1024 * 4;   
 
         var wrapper = new FileWrapper(file, encoding);
-        var fileSize = wrapper.getSize();
+        var oldFileSize = wrapper.getSize();
 
-        var getProgress = function(position, line) {
-            if (fileSize === 0 && (fileSize = wrapper.getSize(file)) === 0)
-                return 0;
-            
-            var result = position / fileSize * 100; 
-            return result <= 100 
-                ? result
-                : position / (fileSize = wrapper.getSize(file)) * 100;
+        var getFileSize = function (position) {
+            return oldFileSize = oldFileSize > position
+                ? oldFileSize 
+                : wrapper.getSize(file);
         }
 
         // Reads optimal number of lines
@@ -54,8 +50,9 @@ var getLineNavigatorClass = function() {
                         if (!isEof)
                             lines = lines.slice(0, lines.length - 1);                   
                         if (index != inChunk.firstLine)
-                            lines = lines.splice(index - inChunk.firstLine);                        
-                        callback(undefined, index, lines, isEof, getProgress(inChunk.offset)); // (err, index, lines, eof)
+                            lines = lines.splice(index - inChunk.firstLine);   
+                        var progress = self.getProgress(inChunk, index, getFileSize(inChunk.offset + inChunk.length));
+                        callback(undefined, index, lines, isEof, progress);
                     });
                 } else {
                     if (!isEof) {                        
@@ -70,6 +67,16 @@ var getLineNavigatorClass = function() {
     }
 
     LineNavigator.prototype.splitLinesPattern = /\r\n|\n|\r/;
+
+    LineNavigator.prototype.getProgress = function (milestone, index, fileSize) {
+        var linesInMilestone = milestone.lastLine - milestone.firstLine + 1;
+        var indexNumberInMilestone = index - milestone.firstLine;
+        var indexLineAssumablePosition = index !== milestone.lastLine 
+            ? milestone.offset + milestone.length / linesInMilestone * indexNumberInMilestone
+            : milestone.offset + milestone.length;
+
+        return Math.floor(100 * (indexLineAssumablePosition / fileSize));
+    }
 
     // Searches for first occurance of pattern in given line returning it's position
     LineNavigator.prototype.searchInLine = function(regex, line) {

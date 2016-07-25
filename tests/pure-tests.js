@@ -128,3 +128,26 @@ describe("LineNavigator.prototype.examineChunk", function(){
         assert.equal(examineChunk(buffer, 0, true), undefined);
     });
 });
+
+describe("LineNavigator.prototype.getProgress", function(){
+    var getProgress = LineNavigator.prototype.getProgress; // (milestone, index, fileSize) : progress
+
+    it("simple", function() {        
+        var milestone = { firstLine: 0, lastLine: 3, offset: 0, length: 10 };
+        assert.equal(getProgress(milestone, 0, 10), 0);
+        assert.equal(getProgress(milestone, 0, 100), 0);        
+    });
+    it("four lines", function() {        
+        var milestone = { firstLine: 0, lastLine: 3, offset: 0, length: 40 };
+        assert.equal(getProgress(milestone, 0, 40), 0);
+        assert.equal(getProgress(milestone, 2, 40), 50);
+        assert.equal(getProgress(milestone, 3, 40), 100);
+        assert.equal(getProgress(milestone, 3, 80), 50);
+    });
+    it("at the end", function() {        
+        var milestone = { firstLine: 90, lastLine: 99, offset: 900, length: 100 };
+        assert.equal(getProgress(milestone, 90, 1000), 90);
+        assert.equal(getProgress(milestone, 95, 1000), 95);
+        assert.equal(getProgress(milestone, 99, 1000), 100);
+    });
+});

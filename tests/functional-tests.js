@@ -35,12 +35,17 @@ describe("readSomeLines", function() {
         var minProgress = -1;
         var maxProgress = 10;
         function readSomeLinesCallback(err, index, lines, eof, progress) {
-            // checks
+            // progress checks
+            assert.isAbove(progress, -1);
+            assert.isAbove(progress, minProgress);
+            assert.isBelow(progress, maxProgress);
+            assert.isBelow(progress, 101);  
+            assert.equal(progress % 1, 0);
+
+            // result checks
             assert.equal(err, undefined);
             assert.equal(wantedIndex, index);
-            assert.notEqual(progress, undefined);
-            // assert.isAboveOrEqual(progress, minProgress);
-            // assert.isBelowOrEqual(progress, maxProgress);            
+            assert.notEqual(progress, undefined);            
 
             var shouldBeEof = index + lines.length >= linesCount;
 
@@ -50,15 +55,15 @@ describe("readSomeLines", function() {
             } else if (wantedIndex === linesCount) {
                 assert.equal(expected, lines[0]);
                 assert.equal(eof, true);
-                //assert.equal(progress, 100);
+                assert.equal(progress, 100);
             } else {
                 assert.fail("should not reach this condition");
             }
 
             // set new expectations
             wantedIndex++;
-            minProgress = wantedIndex - 10;
-            maxProgress = wantedIndex + 10;
+            minProgress = wantedIndex * 2 - 5;
+            maxProgress = wantedIndex * 2 + 5;
 
             if (wantedIndex < linesCount) {
                 expected = 'Line :' + wantedIndex;
