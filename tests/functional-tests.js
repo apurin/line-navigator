@@ -202,3 +202,58 @@ describe("readLines", function() {
         });
     }); 
 });
+
+describe("find", function() {
+    before(function () {
+        var linesCount = 50;
+        createLines(linesCount);
+    });
+
+    after( function(){ 
+        tmpobj.removeCallback();
+    });
+    
+    it("none", function(done) {
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.find(/asd/, 0, function (err, index, match) {        
+            assert.equal(err, undefined);
+            assert.equal(index, undefined);
+            assert.equal(match, undefined);
+            done();
+        });
+    }); 
+
+    it("match any line", function(done) {
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.find(/^Line :\d$/, 0, function (err, index, match) {        
+            assert.equal(err, undefined);
+            assert.equal(index, 0);
+            assert.deepEqual(match, { line: "Line :0", length: 7, offset: 0 });
+            done();
+        });
+    });
+
+    it("match any line starting from index 30", function(done) {
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.find(/^Line :\d+$/, 30, function (err, index, match) {        
+            assert.equal(err, undefined);
+            assert.equal(index, 30);
+            assert.deepEqual(match, { line: "Line :30", length: 8, offset: 0 });
+            done();
+        });
+    }); 
+
+    it("match specific", function(done) {
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.find(/ :37$/, 0, function (err, index, match) {        
+            assert.equal(err, undefined);
+            assert.equal(index, 37);
+            assert.deepEqual(match, { line: "Line :37", length: 4, offset: 4 });
+            done();
+        });
+    });
+});

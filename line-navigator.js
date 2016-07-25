@@ -67,11 +67,8 @@ var getLineNavigatorClass = function() {
 
         self.readLines = function(index, count, callback) {
             var result = [];
-            var progress = undefined;
-
-            self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, currentProgress) {
+            self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, progress) {
                 if (err) return callback(err, index);
-                progress = progress !== undefined ? progress : currentProgress;
 
                 var resultEof = !isEof
                     ? false
@@ -83,6 +80,23 @@ var getLineNavigatorClass = function() {
                     return callback(undefined, index, result.splice(0, count), resultEof, progress);
 
                 self.readSomeLines(partIndex + lines.length, readLinesCallback);
+            });
+        };
+
+        self.find = function(regex, index, callback) {
+            self.readSomeLines(index, function readSomeLinesHandler(err, firstLine, lines, isEof, progress) {
+                if (err) return callback(err);
+
+                for (var i = 0; i < lines.length; i++) {
+                    var match = self.searchInLine(regex, lines[i]);
+                    if (match)       
+                        return callback(undefined, firstLine + i, match);                    
+                }
+
+                if (isEof) 
+                    return callback();
+
+                self.readSomeLines(firstLine + lines.length + 1, readSomeLinesHandler);
             });
         };
     }
@@ -99,7 +113,6 @@ var getLineNavigatorClass = function() {
         return Math.floor(100 * (indexLineAssumablePosition / fileSize));
     }
 
-    // Searches for first occurance of pattern in given line returning it's position
     LineNavigator.prototype.searchInLine = function(regex, line) {
         var match = regex.exec(line);
         return !match 
@@ -111,7 +124,6 @@ var getLineNavigatorClass = function() {
               };
     }
 
-    // searches proper offset from file begining with given milestones
     LineNavigator.prototype.getPlaceToStart = function (index, milestones) {
         for (var i = milestones.length - 1; i >= 0; i--) {
             if (milestones[i].lastLine < index) 
@@ -149,7 +161,6 @@ var getLineNavigatorClass = function() {
         }
     }
 
-    // finds 
     LineNavigator.prototype.examineChunk = function(buffer, bytesRead, isEof) {
         var lines = 0;
         var length = 0;
