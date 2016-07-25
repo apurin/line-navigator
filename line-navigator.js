@@ -63,7 +63,28 @@ var getLineNavigatorClass = function() {
                     }
                 }                
             });
-        };        
+        };
+
+        self.readLines = function(index, count, callback) {
+            var result = [];
+            var progress = undefined;
+
+            self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, currentProgress) {
+                if (err) return callback(err, index);
+                progress = progress !== undefined ? progress : currentProgress;
+
+                var resultEof = !isEof
+                    ? false
+                    :  partIndex + lines.length <= index + count;
+
+                result = result.concat(lines);
+
+                if (result.length >= count || isEof)
+                    return callback(undefined, index, result.splice(0, count), resultEof, progress);
+
+                self.readSomeLines(partIndex + lines.length, readLinesCallback);
+            });
+        };
     }
 
     LineNavigator.prototype.splitLinesPattern = /\r\n|\n|\r/;
