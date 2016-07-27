@@ -156,8 +156,8 @@ describe("readLines", function() {
             assert.equal(eof, true);
             assert.equal(0, index);
             assert.equal(51, lines.length);
-            assert.equal("Line :0", lines[0]);
-            assert.equal("Line :49", lines[49]);
+            for (var i = 0; i < 50; i++) 
+                assert.equal("Line :" + i, lines[i]);            
             assert.equal("", lines[50]);
             done();
         });
@@ -253,6 +253,63 @@ describe("find", function() {
             assert.equal(err, undefined);
             assert.equal(index, 37);
             assert.deepEqual(match, { line: "Line :37", length: 4, offset: 4 });
+            done();
+        });
+    });
+});
+
+describe("findAll", function() {
+    var linesCount = 50;
+    before(function () {        
+        createLines(linesCount);
+    });
+
+    after( function(){ 
+        tmpobj.removeCallback();
+    });
+
+    function checkResults (startIndex, limit, shouldHitLimit, err, index, limitHit, results) {
+        assert.equal(err, undefined);
+        assert.equal(shouldHitLimit, limitHit);
+        assert.equal(shouldHitLimit ? limit : linesCount - startIndex, results.length);
+        assert.isBelow(results.length, limit + 1);
+        assert.equal(startIndex, index);
+
+        for (var i = 0; i < results.length; i++) {
+            var expectedLineIndex = startIndex + i;
+            assert.equal(expectedLineIndex, results[i].index);
+            assert.equal(results[i].line, "Line :" + expectedLineIndex);
+            assert.equal(results[i].line.slice(results[i].offset, results[i].length), "Line :");
+        } 
+    }
+    
+    it("normal", function(done) {
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.findAll(/Line :/, 0, 1000, function (err, index, limitHit, results) {  
+            checkResults(0, 1000, false, err, index, limitHit, results);
+            done();
+        });
+    });
+
+    it("limit", function(done) {
+        var limit = 30;
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.findAll(/Line :/, 0, limit, function (err, index, limitHit, results) {
+            checkResults(0, limit, true, err, index, limitHit, results);
+    
+            done();
+        });
+    });
+
+    it("starting from", function(done) {
+        var limit = 30;
+        var startIndex = 5;
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
+        
+        navigator.findAll(/Line :/, startIndex, limit, function (err, index, limitHit, results) {        
+            checkResults(startIndex, limit, true, err, index, limitHit, results);          
             done();
         });
     });

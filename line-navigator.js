@@ -99,6 +99,28 @@ var getLineNavigatorClass = function() {
                 self.readSomeLines(firstLine + lines.length + 1, readSomeLinesHandler);
             });
         };
+
+        self.findAll = function(regex, index, limit, callback) {
+            var results = [];
+
+            self.readSomeLines(index, function readSomeLinesHandler(err, firstLine, lines, isEof) {
+                if (err) return callback(err, index);
+
+                for (var i = 0; i < lines.length; i++) {
+                    var match = self.searchInLine(regex, lines[i]);
+                    if (match) {
+                        match.index = firstLine + i;
+                        results.push(match);
+                        if (results.length >= limit)
+                            return callback(undefined, index, true, results);
+                    }
+                }
+                if (isEof)
+                    return callback(undefined, index, false, results);
+
+                self.readSomeLines(firstLine + lines.length, readSomeLinesHandler);
+            });
+        };
     }
 
     LineNavigator.prototype.splitLinesPattern = /\r\n|\n|\r/;
