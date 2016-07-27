@@ -60,7 +60,7 @@
                 }
             };
 
-            self.getSize = function(file) {
+            self.getSize = function() {
                 return file.size;
             };
         } 
@@ -93,7 +93,7 @@ else if (typeof define === 'function') {
         return { FileWrapper : createFileWrapper() };    
     });
 }
-// TODO: check that vanilla JS works
+// Vanilla JS
 else {
     FileWrapper = createFileWrapper();
 }

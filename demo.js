@@ -29,7 +29,7 @@ function Read() {
     var file = InitDemo('Read all lines');
     if (!file) return;
     
-    var navigator = new FileNavigator(file);
+    var navigator = new LineNavigator(file);
     
     var indexToStartWith = 0;
     
@@ -63,7 +63,7 @@ function FindNext() {
     var file = InitDemo('Find of "' + pattern + '" pattern starting from ' + nextIndex);
     if (!file) return;
 
-    var navigator = new FileNavigator(file);
+    var navigator = new LineNavigator(file);
     
     navigator.find(new RegExp(pattern), nextIndex, function (err, index, match) {
         finished = new Date();
@@ -97,7 +97,7 @@ function FindAll() {
     var file = InitDemo('Find all lines matching "' + pattern + '" pattern');
     if (!file) return;
     
-    var navigator = new FileNavigator(file);
+    var navigator = new LineNavigator(file);
     
     var indexToStartWith = 0;
     var limitOfMatches = 100;

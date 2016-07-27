@@ -19,6 +19,8 @@ var getLineNavigatorClass = function() {
         }
 
         // Reads optimal number of lines
+        // callback: function(err, index, lines, eof, progress)
+        // where progress is 0-100 % of file 
         self.readSomeLines = function(index, callback) {
             var place = self.getPlaceToStart(index, milestones);     
 
@@ -65,6 +67,9 @@ var getLineNavigatorClass = function() {
             });
         };
 
+        // Reads exact amount of lines
+        // callback: function(err, index, lines, eof, progress)
+        // where progress is 0-100 % of file 
         self.readLines = function(index, count, callback) {
             var result = [];
             self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, progress) {
@@ -83,6 +88,9 @@ var getLineNavigatorClass = function() {
             });
         };
 
+        // Finds next occurrence of regular expression starting from given index
+        // callback: function(err, index, match{offset, length, line})
+        // offset and length are belong to match inside line
         self.find = function(regex, index, callback) {
             self.readSomeLines(index, function readSomeLinesHandler(err, firstLine, lines, isEof, progress) {
                 if (err) return callback(err);
@@ -100,6 +108,10 @@ var getLineNavigatorClass = function() {
             });
         };
 
+        // Finds all occurrences of regular expression starting from given index
+        // callback: function(err, index, limitHit, results)
+        // result is an array of objects with following structure {index, offset, length, line}
+        // offset and length are belong to the match inside line
         self.findAll = function(regex, index, limit, callback) {
             var results = [];
 
@@ -220,7 +232,7 @@ else if (typeof define === 'function') {
         return { LineNavigator : getLineNavigatorClass() };    
     });
 }
-// TODO: check that vanilla JS works
+// Vanilla JS
 else {
     if (typeof FileWrapper === undefined) {
         throw "For vanilla JS please add 'file-wrapper.js' script tag before this one."
