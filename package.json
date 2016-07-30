@@ -4,6 +4,7 @@
   "description": "Reads, searches and navigates HTML5/Node.JS text files of any size in the browser or backend",
   "main": "line-navigator.js",
   "dependencies": {
+    "browserify": "^13.1.0"
   },
   "devDependencies": {
     "chai": "*",
@@ -19,7 +20,14 @@
     "url": "https://github.com/anpur/client-line-navigator.git"
   },
   "keywords": [
-    "frontend", "file", "search", "browser", "html5", "line", "random access", "node"
+    "frontend",
+    "file",
+    "search",
+    "browser",
+    "html5",
+    "line",
+    "random access",
+    "node"
   ],
   "author": "Anton Purin <purin.anton@gmail.com>",
   "license": "MIT",
