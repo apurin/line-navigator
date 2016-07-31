@@ -10,6 +10,7 @@ Features:
 - **Random access by index**: repetitive access is optimized.
 - **Embedded search tools**: allows searching by regular expessions, highlight matches, etc.
 - **Position as per cent**: allows showing nice representation in the UI.
+- **All line endings supported**: all types of line endings are supported even mixed together: `\n`, `\r\n`, `\r`.
 
 Contents:
 - Sources as either [NPM package](https://www.npmjs.com/package/line-navigator) or as standalone files ([file-wrapper.js](https://github.com/anpur/client-line-navigator/blob/master/file-wrapper.js) and [line-navigator.js](https://github.com/anpur/client-line-navigator/blob/master/line-navigator.js))
