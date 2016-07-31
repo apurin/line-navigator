@@ -4,7 +4,6 @@
   "description": "Reads, searches and navigates HTML5/Node.JS text files of any size in the browser or backend",
   "main": "line-navigator.js",
   "dependencies": {
-    "browserify": "^13.1.0"
   },
   "devDependencies": {
     "chai": "*",

@@ -89,8 +89,8 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 // TODO: check that AMD version works
 else if (typeof define === 'function') {
-    define('file-wrapper', [], function(){
-        return { FileWrapper : createFileWrapper() };    
+    define(function(){
+        return createFileWrapper();    
     });
 }
 // Vanilla JS

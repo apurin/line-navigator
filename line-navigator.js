@@ -227,9 +227,9 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 // TODO: check that AMD version works
 else if (typeof define === 'function') {
-    define('line-navigator', ['./file-wrapper.js'], function(fileWrapper){
+    define(['./file-wrapper'], function(fileWrapper){
         FileWrapper = fileWrapper;
-        return { LineNavigator : getLineNavigatorClass() };    
+        return getLineNavigatorClass();    
     });
 }
 // Vanilla JS
