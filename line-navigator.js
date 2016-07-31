@@ -4,10 +4,10 @@ var getLineNavigatorClass = function() {
         var self = this;
 
         // options init 
-        options = options ? options : {};
-        var milestones =    options.milestones    ? options.milestones    : [];    // [ { firstLine, lastLine, offset, length }, ... ]
-        var encoding =      options.encoding      ? options.encoding      : 'utf8';
-        var chunkSize =     options.chunkSize     ? options.chunkSize     : 1024 * 4;   
+        options = options ? options : {};        
+        var encoding =  options.encoding  ? options.encoding  : 'utf8';
+        var chunkSize = options.chunkSize ? options.chunkSize : 1024 * 4;
+        var milestones = [];
 
         var wrapper = new FileWrapper(file, encoding);
         var oldFileSize = wrapper.getSize();
@@ -18,9 +18,6 @@ var getLineNavigatorClass = function() {
                 : wrapper.getSize(file);
         }
 
-        // Reads optimal number of lines
-        // callback: function(err, index, lines, eof, progress)
-        // where progress is 0-100 % of file 
         self.readSomeLines = function(index, callback) {
             var place = self.getPlaceToStart(index, milestones);     
 
@@ -67,9 +64,6 @@ var getLineNavigatorClass = function() {
             });
         };
 
-        // Reads exact amount of lines
-        // callback: function(err, index, lines, eof, progress)
-        // where progress is 0-100 % of file 
         self.readLines = function(index, count, callback) {
             var result = [];
             self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, progress) {
@@ -88,9 +82,6 @@ var getLineNavigatorClass = function() {
             });
         };
 
-        // Finds next occurrence of regular expression starting from given index
-        // callback: function(err, index, match{offset, length, line})
-        // offset and length are belong to match inside line
         self.find = function(regex, index, callback) {
             self.readSomeLines(index, function readSomeLinesHandler(err, firstLine, lines, isEof, progress) {
                 if (err) return callback(err);
@@ -108,10 +99,6 @@ var getLineNavigatorClass = function() {
             });
         };
 
-        // Finds all occurrences of regular expression starting from given index
-        // callback: function(err, index, limitHit, results)
-        // result is an array of objects with following structure {index, offset, length, line}
-        // offset and length are belong to the match inside line
         self.findAll = function(regex, index, limit, callback) {
             var results = [];
 

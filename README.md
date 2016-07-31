@@ -1,152 +1,99 @@
-# LineNavigator (client)
-Read line-by-line, navigate by index and search inside local files right in browser via HTML5.
-- No file size limit: simple [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) lags for big files and crashes browser for files larger than ~400 MB.
-- Random access to lines: lines byte offsets are mapped, so repetitive access will be super quick, either you accessing line 12 or 5424675.
-- Embedded search tools: allowing you to search anything, highlight matches, etc.
-- Position as percentages: you can easily build UI on top of it.
-- Tiny codebase and no dependencies: less than 3 KB.
+# LineNavigator
+A module to read text files (including extra large ones) in the browser and in Node.js line by line.
 
-Current project state:
-- **Code**: READY
-- **Reference**: Full methods coverage here
-- **Demo**: available as source and in jsFiddle
+It accepts both **[HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) for client side** and **file path for server side** in Node.JS.
 
-#### Check it out
-Try it in [jsFiddle](http://jsfiddle.net/3hmee6vb/3/). Git clone and open [demo.html](https://github.com/anpur/client-line-navigator/blob/master/demo.html) to see main scenarios.
+## Summary
+Features:
+- **Modular**: can be used in vanilla JS, Node.JS, Browserify.JS and as AMD module.
+- **No file size limit**: ordinary [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) lags for big files and crashes for files larger than ~400 MB.
+- **Random access by index**: repetitive access is optimized.
+- **Embedded search tools**: allows searching by regular expessions, highlight matches, etc.
+- **Position as per cent**: allows showing nice representation in the UI.
 
-#### Quick start
-Install [line-navigator](https://www.npmjs.com/package/line-navigator) NPM module to the root of your project:
+Contents:
+- Sources as either [NPM package](https://www.npmjs.com/package/line-navigator) or as standalone files ([file-wrapper.js](https://github.com/anpur/client-line-navigator/blob/master/file-wrapper.js) and [line-navigator.js](https://github.com/anpur/client-line-navigator/blob/master/line-navigator.js))
+- Examples of usage in [vanilla JS](https://github.com/anpur/client-line-navigator/tree/master/examples/client-vanilla), [Browserify.JS](https://github.com/anpur/client-line-navigator/tree/master/examples/client-browserify), [Require.JS](https://github.com/anpur/client-line-navigator/tree/master/examples/client-amd-require-js) and [Node.JS](https://github.com/anpur/client-line-navigator/tree/master/examples/server-node)
+- Functional and unit [tests](https://github.com/anpur/client-line-navigator/tree/master/tests)
 
-    npm install line-navigator
+## API
+All [examples](https://github.com/anpur/client-line-navigator/tree/master/examples) contain all methods invocation and comments, so you can use them as a reference.
 
-Add file input, if you don't have one yet, and include scripts to HTML:
+### Constructor
+Creates an instance of LineNavigator.
 ```
-<body>
+var navigator = new LineNavigator(file[, options]);
+```
+Where:
+- `file` [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) for client side or a string with file path for server side.
+- `options` dictionary which can contain the following keys:
+    - `options.encoding` encoding name, default is 'utf8'
+	- `options.chunkSize` size of chunk, default is 1024 * 4
+
+### Read some lines
+Reads optimal amount of lines (which depends on `chunkSize`). 
+```
+navigator.readSomeLines(indexToStartWith, function (err, index, lines, isEof, progress) {
 	...
-	<input type="file" id="input" onchange="readFile()">	
+});
+```
+Where (including callback arguments):
+- `indexToStartWith` index of first line to read
+- `err` will be undefined if no error happenes
+- `index` callback's representation of `indexToStartWith`
+- `lines` an array of strings, where index of first one is `indexToStartWith`
+- `isEof` a boolean which is true if end of file is reached
+- `progress` a 0-100 per cent position of the last line in the chunk  
+
+### Read lines
+Reads exact amount of lines.
+```
+navigator.readLines(indexToStartWith, numberOfLines, function (err, index, lines, isEof, progress) {
 	...
-	<script src="node_modules/line-navigator/nodeline-navigator.js"></script>
-	<script src="node_modules/line-navigator/file-navigator.js"></script>
-</body>
+});
 ```
-Get [HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) instance and pass it to FileNavigator.
+Where (including callback arguments):
+- `indexToStartWith` an index of first line to read
+- `numberOfLines` a number of lines wanted
+- `err` will be undefined if no error happenes
+- `index` callback's representation of `indexToStartWith`
+- `lines` an array of strings, where index of first one is `indexToStartWith`
+- `isEof` a boolean which is true if end of file is reached
+- `progress` a 0-100 per cent position of the last line in chunk
+Method will not return an error if the file contains less lines than requested, just less lines.
+
+### Find
+Finds first lines starting from given index which matches regex pattern.
 ```
-var readFile = function() {
-	var file = document.getElementById('input').files[0];
-
-	var navigator = new FileNavigator(file);
-
-	var indexToStartWith = 0;  // starting from beginning
-		
-	navigator.readSomeLines(indexToStartWith, function linesReadHandler(err, index, lines, eof, progress) {
-		// Error happened
-		if (err) return; 
-		
-		// End of file
-		if (eof) return;
-		
-		// Reading lines
-		for (var i = 0; i < lines.length; i++) {
-			var lineIndex = index + i;
-			var line = lines[i];
-			// Do something with line
-		}		
-		
-		// Reading next chunk, adding number of lines read to first line in current chunk
-		navigator.readSomeLines(index + lines.length, linesReadHandler);
-	});
-}
+navigator.find(regex, indexToStartWith, function(err, index, match) {
+	...
+});
 ```
+Where (including callback arguments):
+- `regex` regular expression to search for
+- `indexToStartWith` an index of first line to read
+- `err` will be undefined if no error happenes
+- `index` callback's representation of `indexToStartWith`
+- `match` a dictionary with the following structure:
+    - `match.line` full line text
+	- `match.offset` position of the match itself in this line
+	- `match.length` length of the match itself in this line
 
-#### Structure
-Solution consists of two classes: `LineNavigator` which holds the general logic and its wrapper `FileNavigator` which injects functions specific for HTML5 File API. To use them - add both of them in described order and instantiate FileNavigator with File instance.
-
-#### LineNavigator
-LineNavigator is a simple class, which allows you to work with any text files without reading it whole to memory.
-Features are:
-- Read whole file line by line
-- Read random line by index (each access saves milestone info to optimize future ones)
-- Find lines matching regular expression starting from index
-- Finding all lines, matching regular pattern
-
-#### FileNavigator
-FileNavigator is a wrapper for LineNavigator to work with HTML5 files locally, right in clients browser.
-Features are:
-- All features of LineNavigator
-- Get % of file processed for read operations
-- Get file size
-
-FileNavigator requires HTML5 support, [check, which browsers support it](http://caniuse.com/#feat=fileapi). Aside of this navigators depends on nothing.
-
-## LineNavigator API
-LineNavigator class doesn't know how to read and decode files to be reusable in different scenarios (line client side, Node.js, etc.). That's why you need to inject them into constructor.
-
-#### **constructor**
-`function LineNavigator(readChunk, decode, options) { ... }`
-
-You need to inject two simple functions into constructor:
-- Reading file chunks: `readChunk = function( offset, length, callback(err, buffer, bytesRead) )`
-- Decoding byte chunks: `decode = function( buffer, callback(text) )`
-- Other settings:
+### Find all
+Finds all matches in file.
 ```
-options = {
-	milestones: [],                   // optional: array of milestones, which can be obtained by getMilestones() method and stored to speed up random reading in future
-	chunkSize: 1024 * 4,              // optional: size of chunk to read at once
-    newLineCode: '\n'.charCodeAt(0),  // optional: byte which represents end of line
-    splitPattern: /\r?\n/             // optional: regex pattern
-}
+navigator.findAll(regex, indexToStartWith, limit, function (err, index, limitHit, results) {
+	...
+});
 ```
-
-#### readSomeLines()
-`function( index, callback(err, index, lines, eof) ) { ... }` Reads optimal number of lines.
-
-#### readLines()
-`function( index, count, callback(err, index, lines, eof) )  { ... }` Reads exact amount of lines.
-
-#### find()
-`function( regex, index, callback(err, index, match) ) { ... }` Finds next occurrence of regular expression starting from given index.
-- `match` is an object with following structure: `match = {offset, length, line}` 
-- `offset` and `length` belong to match inside line
-
-#### findAll()
-`function( regex, index, limit, callback(err, index, limitHit, results) ) { ... }` Finds limited number of lines, matching regular expression starting from given index.
-- `results` is an array of objects with following structure `{index, offset, length, line}`
-- `offset` and `length` belong to match inside line
-
-#### getMilestones() 
-`function()` Returns milestones, which can be saved and then reused while creating new navigator by assigning them to `options.milestones`
-
-## FileNavigator API
-FileNavigator is specially created wrapper of LineNavigator to work with [HTML5 File](http://dev.w3.org/2006/webapi/FileAPI/#file) objects.
-
-#### **constructor**
-`function FileNavigator (file[, encoding][, options]) { ... }` Just provide file
-`options` will be passed further to `LineNavigator` constructor.
-
-Optionally you can provide a string specifying the encoding of the file. If present, this will be passed as the optional encoding parameter to the [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) method.
-
-#### readSomeLines()
-`function( index, callback(err, index, lines, eof, progress) ) { ... }` Reads optimal number of lines.
-
-In addition to LineNavigator callback, FileNavigator provides `progress` in %.
-
-#### readLines()
-`function( index, count, callback(err, index, lines, eof, progress) )  { ... }` Reads exact amount of lines.
-
-In addition to LineNavigator callback, FileNavigator provides `progress` in %.
-
-#### find()
-`function( regex, index, callback(err, index, match) ) { ... }` Finds next occurrence of regular expression starting from given index.
-- `match` is an object with following structure: `match = {offset, length, line}` 
-- `offset` and `length` belong to match inside line
-
-#### findAll()
-`function( regex, index, limit, callback(err, index, limitHit, results) ) { ... }` Finds limited number of lines, matching regular expression starting from given index.
-- `results` is an array of objects with following structure `{index, offset, length, line}`
-- `offset` and `length` belong to match inside line
-
-#### getMilestones() 
-`function()` Returns milestones, which can be saved and then reused while creating new navigator by assigning them to `options.milestones`
-
-#### getSize()
-`function( callback(size) )` Returns size of file in bytes.
+Where (including callback arguments):
+- `regex` regular expression to search for
+- `indexToStartWith` an index of first line to read
+- `limit` max number of matches
+- `err` will be undefined if no error happenes
+- `index` callback's representation of `indexToStartWith`
+- `results` array of matches, where each contains following:
+    - `results[0].index` index of this line
+	- `results[0].line` full line text
+	- `results[0].offset` position of the match itself in this line
+	- `results[0].length` length of the match itself in this line
