@@ -1,4 +1,5 @@
 ;
+/* https://github.com/anpur/line-navigator Anton Purin MIT 2016 */
 var getLineNavigatorClass = function() {
     function LineNavigator (file, options) {
         var self = this;
@@ -207,21 +208,21 @@ var getLineNavigatorClass = function() {
     return LineNavigator;    
 };
 
-// For Node.js
+// Node.js
 if (typeof module !== 'undefined' && module.exports) {
     FileWrapper = require('./file-wrapper.js');
     module.exports = getLineNavigatorClass();
 }
-// TODO: check that AMD version works
+// AMD
 else if (typeof define === 'function') {
     define(['./file-wrapper'], function(fileWrapper){
         FileWrapper = fileWrapper;
         return getLineNavigatorClass();    
     });
 }
-// Vanilla JS
+// Vanilla
 else {
-    if (typeof FileWrapper === undefined) {
+    if (typeof FileWrapper === 'undefined') {
         throw "For vanilla JS please add 'file-wrapper.js' script tag before this one."
     }
     LineNavigator = getLineNavigatorClass();

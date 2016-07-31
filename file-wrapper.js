@@ -1,4 +1,6 @@
-; var createFileWrapper = function() {
+; 
+/* https://github.com/anpur/line-navigator Anton Purin MIT 2016 */
+var createFileWrapper = function() {
 
     function FileWrapper (file, encoding) {
         var self = this;        
@@ -83,17 +85,17 @@
     return FileWrapper;
 }
 
-// For Node.js
+// Node.js
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = createFileWrapper();
 }
-// TODO: check that AMD version works
+// AMD
 else if (typeof define === 'function') {
     define(function(){
         return createFileWrapper();    
     });
 }
-// Vanilla JS
+// Vanilla
 else {
     FileWrapper = createFileWrapper();
 }
