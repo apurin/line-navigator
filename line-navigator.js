@@ -19,6 +19,11 @@ var getLineNavigatorClass = function() {
                 : wrapper.getSize(file);
         }
 
+        var getProgressSimple = function(position) {
+            var size = getFileSize(position);
+            return Math.round(100 * position / size);
+        }
+
         self.readSomeLines = function(index, callback) {
             var place = self.getPlaceToStart(index, milestones);     
 
@@ -50,9 +55,9 @@ var getLineNavigatorClass = function() {
                         if (!isEof)
                             lines = lines.slice(0, lines.length - 1);                   
                         if (index != inChunk.firstLine)
-                            lines = lines.splice(index - inChunk.firstLine);   
-                        var progress = self.getProgress(inChunk, index, getFileSize(inChunk.offset + inChunk.length));
-                        callback(undefined, index, lines, isEof, progress);
+                            lines = lines.splice(index - inChunk.firstLine); 
+                          
+                        callback(undefined, index, lines, isEof, getProgressSimple(inChunk.offset + inChunk.length), inChunk);
                     });
                 } else {
                     if (!isEof) {                        
@@ -66,8 +71,11 @@ var getLineNavigatorClass = function() {
         };
 
         self.readLines = function(index, count, callback) {
+            if (count === 0) 
+                return callback(undefined, index, [], false, 0);            
+
             var result = [];
-            self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, progress) {
+            self.readSomeLines(index, function readLinesCallback(err, partIndex, lines, isEof, progress, inChunk) {
                 if (err) return callback(err, index);
 
                 var resultEof = !isEof
@@ -76,8 +84,11 @@ var getLineNavigatorClass = function() {
 
                 result = result.concat(lines);
 
-                if (result.length >= count || isEof)
-                    return callback(undefined, index, result.splice(0, count), resultEof, progress);
+                if (result.length >= count || isEof) {
+                    result = result.splice(0, count);
+                    var progress = self.getProgress(inChunk, index + result.length - 1, getFileSize(inChunk.offset + inChunk.length));
+                    return callback(undefined, index, result, resultEof, progress);
+                }
 
                 self.readSomeLines(partIndex + lines.length, readLinesCallback);
             });

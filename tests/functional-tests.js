@@ -19,6 +19,24 @@ var createLines = function (linesCount, lastLine, lineEndings) {
     }      
 }
 
+var checkExpectedProgress = function (progress, lastLineIndex, allLinesCount) {
+    assert.notEqual(progress, undefined);
+    assert.isAbove(progress, -1);
+    assert.isBelow(progress, 101);
+
+
+    // end of file
+    if (lastLineIndex === allLinesCount - 1 || allLinesCount === 0) {
+        assert.equal(100, progress);
+    } 
+    // other position
+    else {
+        var expectedProgress = Math.round(100 * lastLineIndex / allLinesCount);
+        assert.isAbove(progress, expectedProgress - 5);
+        assert.isBelow(progress, expectedProgress + 5);
+    }
+}
+
 describe("readSomeLines", function() {
     afterEach( function(){ 
         tmpobj.removeCallback();
@@ -32,20 +50,12 @@ describe("readSomeLines", function() {
 
         var expected = 'Line :0';
         var wantedIndex = 0;
-        var minProgress = -1;
-        var maxProgress = 10;
-        function readSomeLinesCallback(err, index, lines, eof, progress) {
-            // progress checks
-            assert.isAbove(progress, -1);
-            assert.isAbove(progress, minProgress);
-            assert.isBelow(progress, maxProgress);
-            assert.isBelow(progress, 101);  
-            assert.equal(progress % 1, 0);
 
+        function readSomeLinesCallback(err, index, lines, eof, progress) {
             // result checks
             assert.equal(err, undefined);
             assert.equal(wantedIndex, index);
-            assert.notEqual(progress, undefined);            
+            checkExpectedProgress(progress, index + lines.length - 1, linesCount);        
 
             var shouldBeEof = index + lines.length >= linesCount;
 
@@ -62,9 +72,6 @@ describe("readSomeLines", function() {
 
             // set new expectations
             wantedIndex++;
-            minProgress = wantedIndex * 2 - 5;
-            maxProgress = wantedIndex * 2 + 5;
-
             if (wantedIndex < linesCount) {
                 expected = 'Line :' + wantedIndex;
                 navigator.readSomeLines(wantedIndex, readSomeLinesCallback);
@@ -84,17 +91,19 @@ describe("readSomeLines", function() {
         
         var navigator = new lineNavigator(tmpobj.name);
 
-        navigator.readSomeLines(0, function (err, index, lines, eof) {
+        navigator.readSomeLines(0, function (err, index, lines, isEof, progress) {            
             assert.equal(err, undefined);
             assert.equal(0, index);
             assert.deepEqual(lines, ["Line :0", "last line"]);
-            assert.equal(eof, true);
+            assert.equal(isEof, true);
+            checkExpectedProgress(progress, index + lines.length - 1, 1);
 
-            navigator.readSomeLines(1, function (err, index, lines, eof) {
+            navigator.readSomeLines(1, function (err, index, lines, isEof, progress) {
                 assert.equal(err, undefined);
                 assert.equal(1, index);
                 assert.deepEqual(lines, ["last line"]);
-                assert.equal(eof, true);    
+                assert.equal(isEof, true); 
+                checkExpectedProgress(progress, index + lines.length - 1, 1);  
                 done();            
             }); 
         });        
@@ -114,9 +123,9 @@ describe("readSomeLines", function() {
 });
 
 describe("readLines", function() {
-    before(function () {
-        var linesCount = 50;
-        createLines(linesCount);
+    var linesCount = 50;
+    before(function () {        
+        createLines(linesCount, "last line");
     });
     after( function(){ 
         tmpobj.removeCallback();
@@ -125,11 +134,11 @@ describe("readLines", function() {
     it("none", function(done) {
         var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
         
-        navigator.readLines(0, 0, function (err, index, lines, eof, progress) {
-            assert.equal(progress, 0);            
+        navigator.readLines(0, 0, function (err, index, lines, eof, progress) {              
             assert.equal(err, undefined);
             assert.equal(0, index);
             assert.deepEqual(lines, []);
+            checkExpectedProgress(progress, index + lines.length - 1, linesCount + 1);
             done();
         });
     }); 
@@ -138,11 +147,11 @@ describe("readLines", function() {
         var navigator = new lineNavigator(tmpobj.name, { chunkSize: 100 });
         
         navigator.readLines(0, 3, function (err, index, lines, eof, progress) {
-            assert.equal(progress, 0);            
             assert.equal(err, undefined);
             assert.equal(0, index);
             assert.equal(eof, false);
             assert.deepEqual(lines, ["Line :0", "Line :1", "Line :2"]);
+            checkExpectedProgress(progress, index + lines.length - 1, linesCount + 1);
             done();
         });
     });    
@@ -150,15 +159,15 @@ describe("readLines", function() {
     it("more than needed", function(done) {
         var navigator = new lineNavigator(tmpobj.name);
         
-        navigator.readLines(0, 100, function (err, index, lines, eof, progress) {
-            assert.equal(progress, 0);            
+        navigator.readLines(0, 100, function (err, index, lines, eof, progress) {    
             assert.equal(err, undefined);
             assert.equal(eof, true);
             assert.equal(0, index);
             assert.equal(51, lines.length);
             for (var i = 0; i < 50; i++) 
                 assert.equal("Line :" + i, lines[i]);            
-            assert.equal("", lines[50]);
+            assert.equal("last line", lines[50]);
+            checkExpectedProgress(progress, index + lines.length - 1, linesCount + 1);
             done();
         });
     });
@@ -167,11 +176,11 @@ describe("readLines", function() {
         var navigator = new lineNavigator(tmpobj.name);
         
         navigator.readLines(47, 2, function (err, index, lines, eof, progress) {
-            assert.isAbove(progress, 50);     
             assert.equal(err, undefined);
             assert.equal(eof, false);
             assert.equal(47, index);
             assert.deepEqual(lines, ["Line :47", "Line :48"]);
+            checkExpectedProgress(progress, index + lines.length - 1, linesCount + 1);
             done();
         });
     }); 
@@ -180,11 +189,11 @@ describe("readLines", function() {
         var navigator = new lineNavigator(tmpobj.name);
         
         navigator.readLines(50, 1, function (err, index, lines, eof, progress) {
-            assert.isAbove(progress, 50);     
             assert.equal(err, undefined);
             assert.equal(eof, true);
             assert.equal(50, index);
-            assert.deepEqual(lines, [""]);
+            assert.deepEqual(lines, ["last line"]);
+            assert.equal(100, progress);
             done();
         });
     }); 
@@ -193,11 +202,11 @@ describe("readLines", function() {
         var navigator = new lineNavigator(tmpobj.name);
         
         navigator.readLines(49, 1, function (err, index, lines, eof, progress) {
-            assert.isAbove(progress, 50);     
             assert.equal(err, undefined);
             assert.equal(eof, false);
             assert.equal(49, index);
             assert.deepEqual(lines, ["Line :49"]);
+            checkExpectedProgress(progress, 49, linesCount + 1);
             done();
         });
     }); 
