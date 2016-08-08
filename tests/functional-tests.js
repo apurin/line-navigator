@@ -323,3 +323,29 @@ describe("findAll", function() {
         });
     });
 });
+
+describe("encoding", function() {
+    var testEncoding = function (encoding, filename, done) {
+        var filePath = __dirname + "/" + filename;
+
+        var navigator = new lineNavigator(filePath, { encoding: encoding });
+        
+        navigator.readSomeLines(0, function (err, index, lines, eof, progress) {               
+            assert.equal(err, undefined);
+            assert.equal(0, index);   
+            assert.deepEqual(lines, ["Line 1", "Line 2"]);
+            assert.equal(eof, true);
+            done();
+        });
+    }
+
+    it("utf8", function(done) {
+        testEncoding('utf8', 'encoding-utf8.txt', done);
+    });
+    it("utf8 with bom", function(done) {
+        testEncoding('utf8', 'encoding-utf8bom.txt', done);
+    });
+    it("utf16le with bom", function(done) {
+        testEncoding('utf16le', 'encoding-utf16le.txt', done);
+    });
+});

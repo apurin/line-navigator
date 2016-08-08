@@ -151,3 +151,31 @@ describe("LineNavigator.prototype.getProgress", function(){
         assert.equal(getProgress(milestone, 99, 1000), 100);
     });
 });
+
+describe("LineNavigator.prototype.getBomOffset", function(){
+    var getBomOffset = LineNavigator.prototype.getBomOffset;
+
+    var line = 'aaarght!'
+            .split("")
+            .map(function (c) { return c.charCodeAt(0); });
+
+    var testEncoding = function (encoding, bom) {
+        assert.deepEqual(getBomOffset([], encoding), 0);
+        assert.deepEqual(getBomOffset(bom, encoding), bom.length);
+        assert.deepEqual(getBomOffset(line, encoding), 0);
+        assert.deepEqual(getBomOffset(bom.concat(line), encoding), bom.length);
+        var partOfBom =  bom.slice(0, bom.length - 1);
+        assert.deepEqual(getBomOffset(partOfBom.concat(line), encoding), 0);
+    }
+
+    it("utf8", function() {
+        testEncoding('utf8', [239, 187, 191]);
+    });
+    it("utf16le", function() {
+        testEncoding('utf16le', [255, 254]);
+    });
+    it("other", function() {
+        assert.deepEqual(getBomOffset([], 'other'), 0);
+        assert.deepEqual(getBomOffset([239, 187, 191].concat(line), 'other'), 0);
+    });
+});

@@ -5,7 +5,7 @@ var getLineNavigatorClass = function() {
         var self = this;
 
         // options init 
-        options = options ? options : {};        
+        options =       options           ? options           : {};        
         var encoding =  options.encoding  ? options.encoding  : 'utf8';
         var chunkSize = options.chunkSize ? options.chunkSize : 1024 * 4;
         var milestones = [];
@@ -48,7 +48,9 @@ var getLineNavigatorClass = function() {
                 var targetInChunk = inChunk.firstLine <= index && index <= inChunk.lastLine;
 
                 if (targetInChunk) {
-                    wrapper.decode(buffer.slice(0, inChunk.length), function(text) {
+                    var bomOffset = place.offset !== 0 ? 0 : self.getBomOffset(buffer, encoding);
+
+                    wrapper.decode(buffer.slice(bomOffset, inChunk.length), function(text) {
                         var expectedLinesCount = inChunk.lastLine - inChunk.firstLine + (isEof ? 2 : 1);
                         
                         var lines = text.split(self.splitLinesPattern);                            
@@ -68,7 +70,7 @@ var getLineNavigatorClass = function() {
                     }
                 }                
             });
-        };
+        };        
 
         self.readLines = function(index, count, callback) {
             if (count === 0) 
@@ -214,7 +216,31 @@ var getLineNavigatorClass = function() {
         return length > 0 
             ? { lines: lines, length: length - 1 } 
             : undefined;
+    };    
+
+    var bomUtf8 = [239, 187, 191];
+    var bomUtf16le = [255, 254];
+
+    var arrayStartsWith = function (array, startsWith) {
+        for (var i = 0; i < array.length && i < startsWith.length; i++) {
+            if (array[i] !== startsWith[i])
+                return false;
+            if (i == startsWith.length - 1) 
+                return true;
+        }
+        return false;
     };
+
+    LineNavigator.prototype.getBomOffset = function(buffer, encoding) {
+        switch (encoding.toLowerCase()) {
+            case 'utf8':
+                return arrayStartsWith(buffer, bomUtf8) ? bomUtf8.length : 0;
+            case 'utf16le':
+                return arrayStartsWith(buffer, bomUtf16le) ? bomUtf16le.length : 0;
+            default:
+                return 0;
+        }
+    }
 
     return LineNavigator;    
 };
