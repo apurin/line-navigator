@@ -13,12 +13,12 @@ Features:
 - **All line endings supported**: all types of line endings are supported even mixed together: `\n`, `\r\n`, `\r`.
 
 Contents:
-- Sources as either [NPM package](https://www.npmjs.com/package/line-navigator) or as standalone files ([file-wrapper.js](https://github.com/anpur/client-line-navigator/blob/master/file-wrapper.js) and [line-navigator.js](https://github.com/anpur/client-line-navigator/blob/master/line-navigator.js))
-- Examples of usage in [vanilla JS](https://github.com/anpur/client-line-navigator/tree/master/examples/client-vanilla), [Browserify.JS](https://github.com/anpur/client-line-navigator/tree/master/examples/client-browserify), [Require.JS](https://github.com/anpur/client-line-navigator/tree/master/examples/client-amd-require-js) and [Node.JS](https://github.com/anpur/client-line-navigator/tree/master/examples/server-node)
-- Functional and unit [tests](https://github.com/anpur/client-line-navigator/tree/master/tests)
+- Sources as either [NPM package](https://www.npmjs.com/package/line-navigator) or as standalone files ([file-wrapper.js](https://github.com/anpur/line-navigator/blob/master/file-wrapper.js) and [line-navigator.js](https://github.com/anpur/line-navigator/blob/master/line-navigator.js))
+- Examples of usage in [vanilla JS](https://github.com/anpur/line-navigator/tree/master/examples/client-vanilla), [Browserify.JS](https://github.com/anpur/line-navigator/tree/master/examples/client-browserify), [Require.JS](https://github.com/anpur/line-navigator/tree/master/examples/client-amd-require-js) and [Node.JS](https://github.com/anpur/line-navigator/tree/master/examples/server-node)
+- Functional and unit [tests](https://github.com/anpur/line-navigator/tree/master/tests)
 
 ## API
-All [examples](https://github.com/anpur/client-line-navigator/tree/master/examples) contain all methods invocation and comments, so you can use them as a reference.
+All [examples](https://github.com/anpur/line-navigator/tree/master/examples) contain all methods invocation and comments, so you can use them as a reference.
 
 ### Constructor
 Creates an instance of LineNavigator.
