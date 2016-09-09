@@ -1,5 +1,5 @@
 [![Build Status](https://api.travis-ci.org/anpur/line-navigator.svg?branch=master)](https://travis-ci.org/anpur/line-navigator)
-[![NPM:](https://img.shields.io/npm/v/line-navigator.svg?style=flat-square)](https://www.npmjs.com/package/line-navigator)
+[![NPM:](https://img.shields.io/npm/v/line-navigator.svg)](https://www.npmjs.com/package/line-navigator)
 
 # LineNavigator
 A module to read text files (including extra large ones) in the browser and in Node.js line by line.

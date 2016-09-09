@@ -3,14 +3,15 @@
   "version": "2.1.0",
   "description": "Reads, searches and navigates HTML5/Node.JS text files of any size in the browser or backend",
   "main": "line-navigator.js",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "chai": "*",
+    "minifier": "^0.8.0",
     "mocha": "*",
     "tmp": "*"
   },
   "scripts": {
+    "minify": "node minify.js",
     "test": "mocha tests/*-tests.js",
     "test-watch": "mocha tests/*-tests.js -w"
   },
