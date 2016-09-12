@@ -1,2 +1,3 @@
 .gitignore
-examples
+examples/client-*
+examples/server-*

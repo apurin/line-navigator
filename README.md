@@ -1,10 +1,16 @@
+# LineNavigator
 [![Build Status](https://api.travis-ci.org/anpur/line-navigator.svg?branch=master)](https://travis-ci.org/anpur/line-navigator)
 [![NPM:](https://img.shields.io/npm/v/line-navigator.svg)](https://www.npmjs.com/package/line-navigator)
 
-# LineNavigator
-A module to read text files (including extra large ones) in the browser and in Node.js line by line.
+A module to read text files (including extra large ones) in the browser and in Node.js line by line without loading whole file to the memory.
 
 It accepts both **[HTML5 File](https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications) for client side** and **file path for server side** in Node.JS.
+
+Installation:
+
+    npm install line-navigator --save
+
+Check it out live in Tonic: [tonicdev.com/npm/line-navigator](https://tonicdev.com/npm/line-navigator). 
 
 ## Summary
 Features:
