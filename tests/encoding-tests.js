@@ -39,7 +39,7 @@ function testSpecialFile (path, encoding, done) {
     });
 }
 
-describe("Encoding tests", function(){  
+describe("Encoding functional tests", function(){  
     it("utf8", function(done) {
         var path = __dirname + "/encoding-utf8.txt";
         testSpecialFile(path, 'utf8', done);
@@ -52,4 +52,11 @@ describe("Encoding tests", function(){
         var path = __dirname + "/encoding-utf16le.txt";
         testSpecialFile(path, 'utf16le', done);
     });
+});
+
+describe("Encoding unit tests", function(){  
+    it("utf8", function(done) {
+        
+    });
+
 });

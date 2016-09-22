@@ -18,7 +18,7 @@
             "request": "launch",
 			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
 			"stopOnEntry": false,
-			"args": ["tests/pure-tests.js"],
+			"args": ["tests/unit-tests.js", "-f", "LineNavigator.prototype.getLineEnd"],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"env": { "NODE_ENV": "development"}

@@ -53,7 +53,8 @@ describe("LineNavigator.prototype.getLineEnd", function(){
     var getLineEnd = LineNavigator.prototype.getLineEnd; // (buffer, start, end, isEof) : position
     var a = 'a'.charCodeAt(0);
     var r = '\r'.charCodeAt(0);
-    var n = '\n'.charCodeAt(0);    
+    var n = '\n'.charCodeAt(0);   
+    var z = 0; 
     var chunkSize = 6;    
   
     it("none", function() {        
@@ -88,6 +89,36 @@ describe("LineNavigator.prototype.getLineEnd", function(){
         var buffer = [a, a, a, a, a, r, n];
         assert.equal(getLineEnd(buffer, 0, 4, false), undefined);
     });
+
+    it("utf16le LF", function() {        
+        var buffer = [a, z, a, z, n, z, a, z, a, z, a, z, a, z];
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 4);
+        var buffer = [a, z, a, z, a, z, a, z, a, z, a, z, n, z];
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 12);        
+    });
+    it("utf16le CRLF", function() {        
+        var buffer = [a, z, r, z, n, z, a, z, a, z, a, z, a, z];
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 4);  
+        buffer = [a, z, a, z, a, z, a, z, a, z, r, z, n, z];
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 12);        
+    });
+    it("utf16le CR", function() {
+        var buffer = [a, z, a, z, r, z, a, z, a, z, a, z, a, z];
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 4);
+        assert.equal(getLineEnd(buffer, 0, buffer.length, true), 4);
+        buffer = [a, z, a, z, a, z, a, z, a, z, a, z, r, z];
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), undefined);
+        assert.equal(getLineEnd(buffer, 0, buffer.length, true), 12);
+    });
+    it("utf16le start", function() {        
+        var buffer = [r, z, n, z, a, z, r, z, n, z, a, z, a, z];
+        assert.equal(getLineEnd(buffer, 2, buffer.length, false), 8);
+    });
+    it("utf16le end", function() {        
+        var buffer = [a, z, a, z, a, z, a, z, a, z, r, z, n, z];
+        assert.equal(getLineEnd(buffer, 0, 4, false), undefined);
+    });
+
 });
 
 describe("LineNavigator.prototype.examineChunk", function(){
