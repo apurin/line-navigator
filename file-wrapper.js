@@ -79,7 +79,7 @@ var createFileWrapper = function() {
     };
 
     FileWrapper.prototype.isHtml5File = function (file) { 
-        return typeof File === 'function' && file instanceof File; 
+        return typeof File !== 'undefined' && file instanceof File; 
     }
 
     return FileWrapper;
