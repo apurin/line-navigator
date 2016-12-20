@@ -21,6 +21,9 @@ Features:
 - **Position as per cent**: allows showing nice representation in the UI.
 - **All line endings supported**: all types of line endings are supported even mixed together: `\n`, `\r\n`, `\r`.
 
+## Known issues
+Does not support Utf16le encoding due to [this issue](https://github.com/anpur/line-navigator/issues/9). Working on the fix.
+
 Contents:
 - Sources as either [NPM package](https://www.npmjs.com/package/line-navigator) or as standalone files ([file-wrapper.js](https://github.com/anpur/line-navigator/blob/master/file-wrapper.js) and [line-navigator.js](https://github.com/anpur/line-navigator/blob/master/line-navigator.js))
 - Examples of usage in [vanilla JS](https://github.com/anpur/line-navigator/tree/master/examples/client-vanilla), [Browserify.JS](https://github.com/anpur/line-navigator/tree/master/examples/client-browserify), [Require.JS](https://github.com/anpur/line-navigator/tree/master/examples/client-amd-require-js) and [Node.JS](https://github.com/anpur/line-navigator/tree/master/examples/server-node)

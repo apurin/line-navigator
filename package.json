@@ -1,6 +1,6 @@
 {
   "name": "line-navigator",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Reads, searches and navigates HTML5/Node.JS text files of any size in the browser or backend",
   "main": "line-navigator.js",
   "dependencies": {},
