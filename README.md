@@ -15,14 +15,11 @@ Check it out live in Tonic: [tonicdev.com/npm/line-navigator](https://tonicdev.c
 ## Summary
 Features:
 - **Modular**: can be used in vanilla JS, Node.JS, Browserify.JS and as AMD module.
-- **No file size limit**: ordinary [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) lags for big files and crashes for files larger than ~400 MB.
+- **No file size limit**: LineNavigator doesn't try to read all file to the memory unlike ordinary [FileReader.readAsText()](https://developer.mozilla.org/en-US/docs/Web/API/FileReader.readAsText) which lags for big files and crashes for files larger than ~400 MB.
 - **Random access by index**: repetitive access is optimized.
 - **Embedded search tools**: allows searching by regular expessions, highlight matches, etc.
 - **Position as per cent**: allows showing nice representation in the UI.
-- **All line endings supported**: all types of line endings are supported even mixed together: `\n`, `\r\n`, `\r`.
-
-## Known issues
-Does not support Utf16le encoding due to [this issue](https://github.com/anpur/line-navigator/issues/9). Working on the fix.
+- **All line endings supported**: all types of line endings are supported even mixed together: `\n`, `\r\n`.
 
 Contents:
 - Sources as either [NPM package](https://www.npmjs.com/package/line-navigator) or as standalone files ([file-wrapper.js](https://github.com/anpur/line-navigator/blob/master/file-wrapper.js) and [line-navigator.js](https://github.com/anpur/line-navigator/blob/master/line-navigator.js))
@@ -42,6 +39,7 @@ Where:
 - `options` dictionary which can contain the following keys:
     - `options.encoding` encoding name, default is 'utf8'
 	- `options.chunkSize` size of chunk, default is 1024 * 4
+	- `options.throwOnLongLines` return error when line is longer than chunkSize, otherwise it will be threated as several lines
 
 ### Read some lines
 Reads optimal amount of lines (which depends on `chunkSize`). 

@@ -25,7 +25,7 @@ function testSpecialFile (path, encoding, done) {
             var errorHint = `${index}: ${message}`;
 
             assert.equal(index, lineIndex, errorHint);
-            //assert.equal(messageLength, message.length, errorHint);
+            assert.equal(messageLength, message.length, errorHint);
             assert.isTrue(message.endsWith("не латинские символы"), errorHint);
 
             var numbers = message.split(" ");

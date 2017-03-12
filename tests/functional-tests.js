@@ -6,7 +6,7 @@ var lineNavigator = require('../line-navigator.js');
 var tmpobj;
 
 var createLines = function (linesCount, lastLine, lineEndings) {
-    lineEndings = lineEndings != undefined ? lineEndings : ["\r\n", "\n", "\r"];
+    lineEndings = lineEndings != undefined ? lineEndings : ["\r\n", "\n"];
     tmpobj = tmp.fileSync();
 
     // Fill temporary file with lines
@@ -118,6 +118,73 @@ describe("readSomeLines", function() {
             assert.notEqual(err, undefined);
             done();
         });        
+    });
+
+    it("first line smaller than chunkSize throwOnLongLines", function(done) {        
+        tmpobj = tmp.fileSync();
+
+        fs.appendFileSync(tmpobj.name, "abcdefghijklmnopqrstuvwxyz");        
+        fs.appendFileSync(tmpobj.name, "\r\nsecond line\r\nthird line");
+
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 15, throwOnLongLines: true });
+
+        navigator.readSomeLines(0, function (err, index, lines, eof) {
+            assert.notEqual(err, undefined);
+            done();
+        });  
+    });
+
+    it("first line smaller than chunkSize", function(done) {        
+        tmpobj = tmp.fileSync();
+
+        fs.appendFileSync(tmpobj.name, "abcdefghijklmnopqrstuvwxyz");        
+        fs.appendFileSync(tmpobj.name, "\r\n2nd\r\n3rd");
+
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 15, throwOnLongLines: false });
+
+        navigator.readSomeLines(0, function (err, index, lines, eof) {
+            assert.equal(err, undefined);
+            assert.deepEqual(lines, ["abcdefghijklmno"]);
+            assert.equal(eof, false);
+            
+            navigator.readSomeLines(1, function (err, index, lines, eof) {
+                assert.equal(err, undefined);
+                assert.equal(index, 1);
+                assert.equal(eof, false);                
+
+                assert.deepEqual(lines, ["pqrstuvwxyz"]);
+                
+                navigator.readSomeLines(2, function (err, index, lines, eof) {
+                    assert.equal(err, undefined);
+                    assert.equal(index, 2);
+                    assert.equal(eof, true);                
+
+                    assert.deepEqual(lines, ["2nd", "3rd"]);
+                    done();
+                }); 
+            }); 
+        });  
+    });
+
+    it("second line smaller than chunkSize throwOnLongLines", function(done) {        
+        tmpobj = tmp.fileSync();
+        
+        fs.appendFileSync(tmpobj.name, "1st line\n");         
+        fs.appendFileSync(tmpobj.name, "abcdefghijklmnopqrstuvwxyz");       
+
+        var navigator = new lineNavigator(tmpobj.name, { chunkSize: 15, throwOnLongLines: true });
+
+        navigator.readSomeLines(0, function (err, index, lines, eof) {
+            assert.equal(err, undefined);
+            assert.equal(index, 0);
+            assert.equal(eof, false);   
+            assert.deepEqual(lines, ["1st line"]);
+
+            navigator.readSomeLines(1, function (err, index, lines, eof) {
+                assert.notEqual(err, undefined);
+                done();
+            }); 
+        });  
     });
     
 });
@@ -321,31 +388,5 @@ describe("findAll", function() {
             checkResults(startIndex, limit, true, err, index, limitHit, results);          
             done();
         });
-    });
-});
-
-describe("encoding", function() {
-    var testEncoding = function (encoding, filename, done) {
-        var filePath = __dirname + "/" + filename;
-
-        var navigator = new lineNavigator(filePath, { encoding: encoding });
-        
-        navigator.readSomeLines(0, function (err, index, lines, eof, progress) {               
-            assert.equal(err, undefined);
-            assert.equal(0, index);   
-            assert.deepEqual(lines, ["Line 1", "Line 2"]);
-            assert.equal(eof, true);
-            done();
-        });
-    }
-
-    it("utf8", function(done) {
-        testEncoding('utf8', 'encoding-utf8.txt', done);
-    });
-    it("utf8 with bom", function(done) {
-        testEncoding('utf8', 'encoding-utf8bom.txt', done);
-    });
-    it("utf16le with bom", function(done) {
-        testEncoding('utf16le', 'encoding-utf16le.txt', done);
     });
 });

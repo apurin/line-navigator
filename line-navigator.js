@@ -8,6 +8,7 @@ var getLineNavigatorClass = function() {
         options =       options           ? options           : {};        
         var encoding =  options.encoding  ? options.encoding  : 'utf8';
         var chunkSize = options.chunkSize ? options.chunkSize : 1024 * 4;
+        var throwOnLongLines = options.throwOnLongLines !== undefined ? options.throwOnLongLines : false;
         var milestones = [];
 
         var wrapper = new FileWrapper(file, encoding);
@@ -33,8 +34,23 @@ var getLineNavigatorClass = function() {
                 var isEof = bytesRead < chunkSize;
   
                 var chunkContent = self.examineChunk(buffer, bytesRead, isEof); 
-                if (chunkContent === undefined)
-                    return callback('Line ' + index + ' is out of index, last available: ' + (milestones.length > 0 ? milestones[milestones.length - 1].lastLine : "none"), index);
+                if (chunkContent === undefined) {
+                    // Line is longer than a chunkSize
+                    if (bytesRead > 0) {
+                        if (throwOnLongLines) {
+                            return callback('Line ' + index + ' is longer than chunk size (' + chunkSize + ')', index);
+                        } else {
+                            chunkContent = {
+                                lines: 1,
+                                length: bytesRead - 1,
+                                noLineEnding: true
+                            };
+                        }
+                    } else {
+                        return callback('Line ' + index + ' is out of index, last available: ' + (milestones.length > 0 ? milestones[milestones.length - 1].lastLine : "none"), index);
+                    }
+                }
+                
                 var inChunk = { 
                     firstLine: place.firstLine, 
                     lastLine: place.firstLine + chunkContent.lines - 1, 
@@ -54,7 +70,7 @@ var getLineNavigatorClass = function() {
                         var expectedLinesCount = inChunk.lastLine - inChunk.firstLine + (isEof ? 2 : 1);
                         
                         var lines = text.split(self.splitLinesPattern);                            
-                        if (!isEof)
+                        if (!isEof && !chunkContent.noLineEnding)
                             lines = lines.slice(0, lines.length - 1);                   
                         if (index != inChunk.firstLine)
                             lines = lines.splice(index - inChunk.firstLine); 
