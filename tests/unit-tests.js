@@ -80,26 +80,18 @@ describe("LineNavigator.prototype.getLineEnd", function(){
         var buffer = [a, a, n, a, a, a, a];
         assert.equal(getLineEnd(buffer, 0, buffer.length, false), 2);
         var buffer = makeUtf16le(buffer);
-        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 2 * 2);
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 2 * 2 + 1);
 
         var buffer = [a, a, a, a, a, a, n];
         assert.equal(getLineEnd(buffer, 0, buffer.length, false), 6);    
         var buffer = makeUtf16le(buffer);    
-        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 6 * 2);
+        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 6 * 2 + 1);
     });
     it("CRLF", function() {        
         var buffer = [a, r, n, a, a, a, a];
         assert.equal(getLineEnd(buffer, 0, buffer.length, false), 2);  
         buffer = [a, a, a, a, a, r, n];
         assert.equal(getLineEnd(buffer, 0, buffer.length, false), 6);        
-    });
-    it("CR", function() {
-        var buffer = [a, a, r, a, a, a, a];
-        assert.equal(getLineEnd(buffer, 0, buffer.length, false), 2);
-        assert.equal(getLineEnd(buffer, 0, buffer.length, true), 2);
-        buffer = [a, a, a, a, a, a, r];
-        assert.equal(getLineEnd(buffer, 0, buffer.length, false), undefined);
-        assert.equal(getLineEnd(buffer, 0, buffer.length, true), 6);
     });
     it("start", function() {        
         var buffer = [r, n, a, r, n, a, a];
@@ -119,7 +111,7 @@ describe("LineNavigator.prototype.examineChunk", function(){
     var n = '\n'.charCodeAt(0);   
   
     it("simple", function() {        
-        var buffer = [a, r, a, r, a];
+        var buffer = [a, n, a, n, a];
         assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, length: 3 });
         buffer = [a, n, a, n, a];
         assert.deepEqual(examineChunk(buffer, buffer.length, false), { lines: 2, length: 3 });

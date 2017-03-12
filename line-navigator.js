@@ -171,26 +171,18 @@ var getLineNavigatorClass = function() {
         return { firstLine: 0, offset: 0, isNew: milestones.length === 0 };
     }
 
-    // searches for line end, which can be \r\n, \n or \r (Windows, *nix, MacOs line endings)
+    // searches for line end, which can be \r\n (Windows) or \n (Unix)
     // returns line end postion including all line ending
     LineNavigator.prototype.getLineEnd = function (buffer, start, end, isEof) {
         var newLineCode = '\n'.charCodeAt(0);
         var caretReturnCode = '\r'.charCodeAt(0);
 
         for (var i = start; i < end; i++) {
-            var char = buffer[i];
-            if (char === newLineCode) {
-                return i;
-            } else if (char === caretReturnCode) {
-                // \r is a last character in a given buffer and it is not the end of file yet, so it could be \r\n sequence which was separated
-                var canBeSplitted = (i == end - 1) && !isEof; 
-
-                if (!canBeSplitted) {
-                    return buffer[i + 1] === newLineCode 
-                        ? i + 1 
-                        : i;
+            if (buffer[i] === newLineCode) {                
+                if (i !== end && buffer[i + 1] === 0) {
+                    return i + 1; // it is UTF16LE and trailing zero belongs to \n
                 } else {
-                    return undefined;
+                    return i;
                 }
             }
         }

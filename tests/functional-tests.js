@@ -32,8 +32,8 @@ var checkExpectedProgress = function (progress, lastLineIndex, allLinesCount) {
     // other position
     else {
         var expectedProgress = Math.round(100 * lastLineIndex / allLinesCount);
-        assert.isAbove(progress, expectedProgress - 5);
-        assert.isBelow(progress, expectedProgress + 5);
+        assert.isAbove(progress, expectedProgress - 10);
+        assert.isBelow(progress, expectedProgress + 10);
     }
 }
 
