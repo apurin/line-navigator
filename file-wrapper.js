@@ -75,7 +75,9 @@ var createFileWrapper = function() {
     }
 
     FileWrapper.prototype.isNode = function (file) { 
-        return typeof module !== 'undefined' && module.exports && typeof file === 'string'; 
+        // This line of code was taken from
+        // https://github.com/iliakan/detect-node/blob/master/index.js
+        return Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
     };
 
     FileWrapper.prototype.isHtml5File = function (file) { 
