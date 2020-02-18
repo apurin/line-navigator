@@ -194,7 +194,7 @@ var getLineNavigatorClass = function() {
         var caretReturnCode = '\r'.charCodeAt(0);
 
         for (var i = start; i < end; i++) {
-            if (buffer[i] === newLineCode || buffer[i] === caretReturnCode) {                
+            if (buffer[i] === newLineCode || buffer[i] === caretReturnCode) {//Line end \r for classic Mac                
                 if (i !== end && buffer[i + 1] === 0) {
                     return i + 1; // it is UTF16LE and trailing zero belongs to \n
                 } else {
