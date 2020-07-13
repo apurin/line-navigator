@@ -10,6 +10,7 @@ var getLineNavigatorClass = function() {
         var chunkSize = options.chunkSize ? options.chunkSize : 1024 * 4;
         var throwOnLongLines = options.throwOnLongLines !== undefined ? options.throwOnLongLines : false;
         var milestones = [];
+        LineNavigator.prototype.splitLinesPattern = options.splitLinesPattern ? options.splitLinesPattern :/\r\n|\n|\r/;
 
         var wrapper = new FileWrapper(file, encoding);
         var oldFileSize = wrapper.getSize();
@@ -191,10 +192,11 @@ var getLineNavigatorClass = function() {
     // returns line end postion including all line ending
     LineNavigator.prototype.getLineEnd = function (buffer, start, end, isEof) {
         var newLineCode = '\n'.charCodeAt(0);
-        var caretReturnCode = '\r'.charCodeAt(0);
+        if(LineNavigator.prototype.splitLinesPattern === '\r') newLineCode = '\r'.charCodeAt(0);
 
         for (var i = start; i < end; i++) {
-            if (buffer[i] === newLineCode || buffer[i] === caretReturnCode) {//Line end \r for classic Mac                
+            if (buffer[i] === newLineCode ){
+            //if (buffer[i] === newLineCode || buffer[i] === caretReturnCode) {//Line end \r for classic Mac                
                 if (i !== end && buffer[i + 1] === 0) {
                     return i + 1; // it is UTF16LE and trailing zero belongs to \n
                 } else {
